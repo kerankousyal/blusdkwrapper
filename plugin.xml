@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-bluprovision" version="0.1.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>BluProvisionWrapper</name>
+    <js-module name="BluProvisionWrapper" src="www/BluProvisionWrapper.js">
+        <clobbers target="cordova.plugins.BluProvisionWrapper" /></js-module>
+    <platform name="ios">
+        <config-file parent="/*" target="config.xml">
+        <feature name="BluProvisionWrapper"><param name="ios-package" value="BluProvisionWrapper" /></feature>
+            <framework src="src/ios/Bluvision.framework" custom="true" embed="true"/>
+    </config-file><source-file src="src/ios/BluProvisionWrapper.m" />
+    </platform>
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="BluProvisionWrapper">
+                <param name="android-package" value="cordova-plugin-bluprovision.BluProvisionWrapper" />
+            </feature>
+        </config-file>
+        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+        <source-file src="src/android/BluProvisionWrapper.java" target-dir="src/cordova-plugin-bluprovision/BluProvisionWrapper" />
+    </platform>
+</plugin>
