@@ -8,10 +8,10 @@ https://medium.com/@sangkhim/build-your-first-cordova-plugin-for-ionic-native-38
 # Example 
 To clone the project:
 
-git clone https://github.com/ato-team/cordova-plugin-abrakm-sdk.git
+git clone https://github.com/trivedi9/bluprocordovawrapper.git
 To add the plugin to your project:
 
-cordova plugin add --link ../cordova-plugin-abrakm-sdk
+cordova plugin add --link ../cordova-plugin-name
 To remove the plugin from your project:
 
 cordova plugin rm cordova-plugin-abrakm-sdk
@@ -20,7 +20,7 @@ To check your project’s plugins:
 ionic cordova plugin ls
 You should see output like:
 
-cordova-plugin-abrakm-sdk 1.0.0 "Abrakm SDK Cordova Plugin"
+cordova-plugin-abrakm-sdk 1.0.0 "your Cordova Plugin"
 cordova-plugin-compat 1.2.0 "Compat"
 cordova-plugin-device 1.1.4 "Device"
 cordova-plugin-geolocation 2.4.3 "Geolocation"
