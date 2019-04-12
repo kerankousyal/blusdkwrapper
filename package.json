@@ -15,5 +15,9 @@
     "cordova-android"
   ],
   "author": "kiran",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@ionic-native/core": "^5.4.0",
+    "gulp": "^4.0.0"
+  }
 }

@@ -10,6 +10,7 @@
     </config-file><source-file src="src/ios/BluProvisionWrapper.m" />
     </platform>
     <platform name="android">
+      <framework src="src/android/*.gradle" custom="true" type="gradleReference" />
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="BluProvisionWrapper">
                 <param name="android-package" value="cordova-plugin-bluprovision.BluProvisionWrapper" />
