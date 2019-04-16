@@ -22,21 +22,24 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-      if (action.equals("init")) {
+        if (action.equals("init")) {
             this.init(callbackContext);
             return true;
-      } else if (action.equals("startScan")) {
+          } else if (action.equals("startScan")) {
             this.startScan(callbackContext);
             return true;
-        } else if (action.equals("connectToBeacon")) {
+          } else if (action.equals("stopScan")) {
+            this.stopScan();
+            return true;
+          } else if (action.equals("connectToBeacon")) {
             JSONObject request = args.getJSONObject(0);
             this.connectToBeacon(request, callbackContext);
             return true;
-        } else if (action.equals("disconnectBeacon")) {
+          } else if (action.equals("disconnectBeacon")) {
             JSONObject request = args.getJSONObject(0);
             this.disconnectBeacon(request, callbackContext);
             return true;
-        } else if (action.equals("configureBeacon")) {
+          } else if (action.equals("configureBeacon")) {
             JSONObject request = args.getJSONObject(0);
             this.configureBeacon(request, callbackContext);
             return true;
@@ -44,18 +47,10 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
         return false;
     }
 
-    private void init(String message, CallbackContext callbackContext) {
+    private void init(CallbackContext callbackContext) {
         Context context = this.cordova.getActivity().getApplicationContext();
         mBeaconInteractor = new BeaconInteractor();
         mBeaconInteractor.init(context, this);
-    }
-
-    private void coolMethod(String message, CallbackContext callbackContext) {
-        if (message != null && message.length() > 0) {
-            callbackContext.success(message);
-        } else {
-            callbackContext.error("Expected one non-empty string argument.");
-        }
     }
 
     //1. Create a profile for scanning -> S-Beacon
@@ -64,9 +59,14 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
     }
 
     //2. Send scan result js BluProvisionWrapper
-    private void startScan(JSONObject message, CallbackContext callbackContext) {
+    private void startScan(CallbackContext callbackContext) {
       scanCallbackContext = callbackContext;
       mBeaconInteractor.startScan();
+    }
+
+    private void stopScan() {
+        scanCallbackContext = null;
+        mBeaconInteractor.stopScan();
     }
 
     //3. Send scan result js BluProvisionWrapper
@@ -88,10 +88,11 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
     private void connectToBeacon(JSONObject message, CallbackContext callbackContext) throws JSONException{
       if (message != null && message.length() > 0) {
         connectionCallbackContext = callbackContext;
-        int beaconIndex = message.getInt(String.valueOf(0));
-        String beaconName = message.getString(String.valueOf(1));
-        String password = message.getString(String.valueOf(2));
-        mBeaconInteractor.connectToBeacon(beaconIndex, beaconName, password);
+        //int beaconIndex = message.getInt(String.valueOf(0));
+        //String beaconName = message.getString(String.valueOf(1));
+        String password = message.getString(String.valueOf(1));
+        Beacon beacon = new Gson().fromJson(message.getString(String.valueOf(0)), Beacon.class);
+        mBeaconInteractor.connectToBeacon(beacon, password);
       }
     }
 
@@ -99,9 +100,10 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
     private void disconnectBeacon(JSONObject message, CallbackContext callbackContext) throws JSONException{
       if (message != null && message.length() > 0) {
         connectionCallbackContext = callbackContext;
-        int beaconIndex = message.getInt(String.valueOf(0));
-        String beaconName = message.getString(String.valueOf(1));
-        mBeaconInteractor.disconnectBeacon(beaconIndex, beaconName);
+        //int beaconIndex = message.getInt(String.valueOf(0));
+        //String beaconName = message.getString(String.valueOf(1));
+        Beacon beacon = new Gson().fromJson(message.getString(String.valueOf(0)), Beacon.class);
+        mBeaconInteractor.disconnectBeacon(beacon);
       }
     }
 

@@ -68,10 +68,10 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
 
     }
 
-    public void connectToBeacon(int beaconIndex, String beaconName, String password){
-      if(beaconList != null && beaconList.size() > 0){
-          Beacon beacon = beaconList.get(beaconIndex);
-          if(beacon.getDevice().getName().equals(beaconName)){
+    public void connectToBeacon(Beacon beacon, String password){
+      //if(beaconList != null && beaconList.size() > 0){
+          //Beacon beacon = beaconList.get(beaconIndex);
+          //if(beacon.getDevice().getName().equals(beaconName)){
             if(beacon.getBeaconType() == BeaconType.S_BEACON){
                 sBeacon = (SBeacon)beacon;
                 ConcurrentHashMap<BeaconType,Beacon> beacons = beacon.getAssociations();
@@ -81,31 +81,31 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
                     }
                 }
                 if(sBeacon != null){
-                  ((SBeacon)sBeacon).setBeaconConfigurationListener(this);
-                  ((SBeacon)sBeacon).connect(context, password);
+                    ((SBeacon)sBeacon).setBeaconConfigurationListener(this);
+                    ((SBeacon)sBeacon).connect(context, password);
                 }
             }
+          //}
+
+          if(mBeacon.getBeaconType()==BeaconType.I_BEACON){
+               //Toast.makeText(getActivity(),((IBeacon)mBeacon).getUuid(),Toast.LENGTH_LONG).show();
+               //Toast.makeText(getActivity(),String.valueOf(((IBeacon)mBeacon).getMajor()),Toast.LENGTH_LONG).show();
+               //Toast.makeText(getActivity(), String.valueOf(((IBeacon) mBeacon).getMinor()), Toast.LENGTH_LONG).show();
           }
 
-            // if(mBeacon.getBeaconType()==BeaconType.I_BEACON){
-            //     Toast.makeText(getActivity(),((IBeacon)mBeacon).getUuid(),Toast.LENGTH_LONG).show();
-            //     Toast.makeText(getActivity(),String.valueOf(((IBeacon)mBeacon).getMajor()),Toast.LENGTH_LONG).show();
-            //     Toast.makeText(getActivity(), String.valueOf(((IBeacon) mBeacon).getMinor()), Toast.LENGTH_LONG).show();
-            // }
-
-            // if(mBeacon.getBeaconType()==BeaconType.EDDYSTONE_URL_BEACON){
-            //     Toast.makeText(getActivity(),((EddystoneURLBeacon)mBeacon).getURL(),Toast.LENGTH_LONG).show();
-            // }
-      }
+          if(mBeacon.getBeaconType()==BeaconType.EDDYSTONE_URL_BEACON){
+               //Toast.makeText(getActivity(),((EddystoneURLBeacon)mBeacon).getURL(),Toast.LENGTH_LONG).show();
+           }
+      //}
     }
 
-    public void disconnectBeacon(int beaconIndex, String beaconName){
-      if(beaconList != null && beaconList.size() > 0){
-          Beacon beacon = beaconList.get(beaconIndex);
-          if(beacon.getDevice().getName().equals(beaconName)){
+    public void disconnectBeacon(Beacon beacon){
+      //if(beaconList != null && beaconList.size() > 0){
+          //Beacon beacon = beaconList.get(beaconIndex);
+          if(beacon.getDevice().getBondState() == BluetoothDevice.BOND_BONDED){
               ((SBeacon)beacon).disconnect();
           }
-        }
+        //}
     }
 
     @Override
