@@ -43,19 +43,27 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
             JSONObject request = args.getJSONObject(0);
             this.configureBeacon(request, callbackContext);
             return true;
-        }
-        return false;
+          } else if (action.equals("updateScanRules")) {
+            JSONObject request = args.getJSONObject(0);
+            this.updateScanRules(request, callbackContext);
+            return true;
+          }
+          return false;
     }
 
     private void init(CallbackContext callbackContext) {
         Context context = this.cordova.getActivity().getApplicationContext();
+        Activity activity = this.cordova.getActivity();
         mBeaconInteractor = new BeaconInteractor();
-        mBeaconInteractor.init(context, this);
+        mBeaconInteractor.init(context, this, activity);
     }
 
     //1. Create a profile for scanning -> S-Beacon
     private void updateScanRules(JSONObject message, CallbackContext callbackContext) {
-
+      if (message != null && message.length() > 0) {
+        String beaconType = message.getString(String.valueOf(0));
+        mBeaconInteractor.updateScanRules(beaconType);
+      }
     }
 
     //2. Send scan result js BluProvisionWrapper
@@ -72,9 +80,10 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
     //3. Send scan result js BluProvisionWrapper
     private void setScanResults(Beacon beacon) {
         JSONObject result = new JSONObject();
-        convertBeaconToJsonObject(beacon);
         try {
-            result.put("BEACON_FOUND",  beacon);
+          result.put("BEACON_NAME",  beacon.getDevice().getName());
+          result.put("BEACON_ADDRESS",  beacon.getDevice().getAddress());
+          result.put("BEACON_TYPE",  beacon.getBeaconType().getStringType());
           } catch (JSONException e) {
               e.printStackTrace();
           }
@@ -88,11 +97,10 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
     private void connectToBeacon(JSONObject message, CallbackContext callbackContext) throws JSONException{
       if (message != null && message.length() > 0) {
         connectionCallbackContext = callbackContext;
-        //int beaconIndex = message.getInt(String.valueOf(0));
-        //String beaconName = message.getString(String.valueOf(1));
+        String address = message.getString(String.valueOf(0));
+        String beaconType = message.getString(String.valueOf(1));
         String password = message.getString(String.valueOf(1));
-        Beacon beacon = new Gson().fromJson(message.getString(String.valueOf(0)), Beacon.class);
-        mBeaconInteractor.connectToBeacon(beacon, password);
+        mBeaconInteractor.connectToBeacon(address, beaconType, password);
       }
     }
 
@@ -100,10 +108,8 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
     private void disconnectBeacon(JSONObject message, CallbackContext callbackContext) throws JSONException{
       if (message != null && message.length() > 0) {
         connectionCallbackContext = callbackContext;
-        //int beaconIndex = message.getInt(String.valueOf(0));
-        //String beaconName = message.getString(String.valueOf(1));
-        Beacon beacon = new Gson().fromJson(message.getString(String.valueOf(0)), Beacon.class);
-        mBeaconInteractor.disconnectBeacon(beacon);
+        String address = message.getString(String.valueOf(0));
+        mBeaconInteractor.disconnectBeacon(address);
       }
     }
 
@@ -145,9 +151,5 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
         if (this.connectionCallbackContext != null) {
             this.connectionCallbackContext.sendPluginResult(pr);
         }
-    }
-
-    public String convertBeaconToJsonObject(Beacon beacon){
-        return new Gson().toJson(beacon);
     }
 }

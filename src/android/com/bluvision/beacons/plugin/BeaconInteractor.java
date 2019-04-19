@@ -14,26 +14,49 @@ import com.bluvision.beeks.sdk.interfaces.BeaconConfigurationListener;
 import com.bluvision.beeks.sdk.util.BeaconManager;
 
 import android.content.Context;
+import android.app.Activity;
+import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BeaconInteractor implements BeaconListener, BeaconConfigurationListener{
     private BeaconManager mBeaconManager;
-    private List<Beacon> beaconList = new ArrayList<>();
+    private Map<String, Beacon> beaconList = new HashMap<>();
     private BeaconCallback mBeaconCallback;
     private boolean scanning;
     private Beacon sBeacon;
     private Context context;
 
-    public void init(Context context, BeaconCallback beaconCallback){
+    public void init(Context context, BeaconCallback beaconCallback, Activity activity){
           this.context = context;
+          this.activity = activity;
           mBeaconManager = BluVisionManagerHandler.getInstance(context).getBeaconManager();
           mBeaconManager.addBeaconListener(this);
           mBeaconManager.addRuleToIncludeScanByType(BeaconType.S_BEACON);
           mBeaconCallback = beaconCallback;
+    }
+
+    public void updateScanRules(String type){
+      if(type.equals(BeaconType.I_BEACON.getStringType())){
+        mBeaconManager.addRuleToIncludeScanByType(BeaconType.I_BEACON);
+      } else if (type.equals(BeaconType.S_BEACON.getStringType())){
+        mBeaconManager.addRuleToIncludeScanByType(BeaconType.S_BEACON);
+      } else if (type.equals(BeaconType.CONFIGURABLE_BEACON.getStringType())){
+        mBeaconManager.addRuleToIncludeScanByType(BeaconType.CONFIGURABLE_BEACON);
+      } else if (type.equals(BeaconType.EDDYSTONE.getStringType())){
+        mBeaconManager.addRuleToIncludeScanByType(BeaconType.EDDYSTONE);
+      } else if (type.equals(BeaconType.EDDYSTONE_UID_BEACON.getStringType())){
+        mBeaconManager.addRuleToIncludeScanByType(BeaconType.EDDYSTONE_UID_BEACON);
+      } else if (type.equals(BeaconType.EDDYSTONE_TLM_BEACON.getStringType())){
+        mBeaconManager.addRuleToIncludeScanByType(BeaconType.EDDYSTONE_TLM_BEACON);
+      } else if (type.equals(BeaconType.EDDYSTONE_URL_BEACON.getStringType())){
+        mBeaconManager.addRuleToIncludeScanByType(BeaconType.EDDYSTONE_URL_BEACON);
+      } else {
+        mBeaconManager.addRuleToIncludeScanByType(BeaconType.MOTION);
+      }
     }
 
     public void startScan(){
@@ -50,17 +73,22 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
 
     @Override
     public void onBeaconFound(final Beacon beacon) {
-        if (beacon != null) {
-          beaconList.add(beacon);
-          if (mBeaconCallback != null){
-              mBeaconCallback.beaconFound(beacon);
+      activity.runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+              if (beacon != null) {
+                  beaconList.put(beacon.getDevice().getAddress(), beacon);
+                  if (mBeaconCallback != null){
+                      mBeaconCallback.beaconFound(beacon);
+                  }
+              }
           }
-        }
+      });
     }
 
     @Override
     public void bluetoothIsNotEnabled() {
-        //"Please activate your Bluetooth connection"
+        Toast.makeText(activity, "Please enable bluetooth",Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -68,44 +96,39 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
 
     }
 
-    public void connectToBeacon(Beacon beacon, String password){
-      //if(beaconList != null && beaconList.size() > 0){
-          //Beacon beacon = beaconList.get(beaconIndex);
-          //if(beacon.getDevice().getName().equals(beaconName)){
-            if(beacon.getBeaconType() == BeaconType.S_BEACON){
+    public void connectToBeacon(String address, String type, String password){
+          Beacon beacon = beaconList.get(address);
+            if(type.equals(BeaconType.S_BEACON.getStringType())){
                 sBeacon = (SBeacon)beacon;
-                ConcurrentHashMap<BeaconType,Beacon> beacons = beacon.getAssociations();
-                for (Beacon beaconAssociated : beacons.values()){
-                    if(beaconAssociated.getBeaconType() == BeaconType.S_BEACON){
-                        sBeacon = (SBeacon)beaconAssociated;
-                    }
-                }
-                if(sBeacon != null){
-                    ((SBeacon)sBeacon).setBeaconConfigurationListener(this);
-                    ((SBeacon)sBeacon).connect(context, password);
+            }
+            ConcurrentHashMap<BeaconType,Beacon> beacons = beacon.getAssociations();
+            for (Beacon beaconAssociated : beacons.values()){
+                if(beaconAssociated.getBeaconType() == BeaconType.S_BEACON){
+                    sBeacon = (SBeacon)beaconAssociated;
                 }
             }
-          //}
+            if(sBeacon != null){
+                ((SBeacon)sBeacon).setBeaconConfigurationListener(this);
+                ((SBeacon)sBeacon).connect(context, password);
+            }
 
-          if(mBeacon.getBeaconType()==BeaconType.I_BEACON){
-               //Toast.makeText(getActivity(),((IBeacon)mBeacon).getUuid(),Toast.LENGTH_LONG).show();
-               //Toast.makeText(getActivity(),String.valueOf(((IBeacon)mBeacon).getMajor()),Toast.LENGTH_LONG).show();
-               //Toast.makeText(getActivity(), String.valueOf(((IBeacon) mBeacon).getMinor()), Toast.LENGTH_LONG).show();
+          if(beacon.getBeaconType()==BeaconType.I_BEACON){
+               Toast.makeText(activity, ((IBeacon)mBeacon).getUuid(),Toast.LENGTH_LONG).show();
+               Toast.makeText(activity, String.valueOf(((IBeacon)mBeacon).getMajor()),Toast.LENGTH_LONG).show();
+               Toast.makeText(activity, String.valueOf(((IBeacon) mBeacon).getMinor()), Toast.LENGTH_LONG).show();
           }
 
-          if(mBeacon.getBeaconType()==BeaconType.EDDYSTONE_URL_BEACON){
-               //Toast.makeText(getActivity(),((EddystoneURLBeacon)mBeacon).getURL(),Toast.LENGTH_LONG).show();
+          if(beacon.getBeaconType()==BeaconType.EDDYSTONE_URL_BEACON){
+               Toast.makeText(activity,((EddystoneURLBeacon)mBeacon).getURL(),Toast.LENGTH_LONG).show();
            }
-      //}
     }
 
-    public void disconnectBeacon(Beacon beacon){
-      //if(beaconList != null && beaconList.size() > 0){
-          //Beacon beacon = beaconList.get(beaconIndex);
-          if(beacon.getDevice().getBondState() == BluetoothDevice.BOND_BONDED){
+    public void disconnectBeacon(String address){
+          Beacon beacon = beaconList.get(address);
+          if(beacon.getDevice().getBondState() == BluetoothDevice.BOND_BONDED &&
+            beacon.getBeaconType() == BeaconType.S_BEACON){
               ((SBeacon)beacon).disconnect();
           }
-        //}
     }
 
     @Override
@@ -113,9 +136,14 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
         if(connected && authenticated){
             ((SBeacon)sBeacon).alert(true, true);
             ConfigurableBeacon configurableBeacon = (ConfigurableBeacon)sBeacon;
-            configurableBeacon.readIBeaconUUID();
+            mBeaconCallback.updateBeaconMetaData(configurableBeacon.readIBeaconUUID());
+            mBeaconCallback.updateBeaconMetaData(configurableBeacon.getDevice().getAddress());
+            Toast.makeText(activity, "Connected "+sBeacon.getDevice().getName(),
+                Toast.LENGTH_LONG).show();
             mBeaconCallback.updateConnectionState(State.CONNECTED);
         }else{
+            Toast.makeText(activity, "Connection fail "+sBeacon.getDevice().getName(),
+                Toast.LENGTH_LONG).show();
             mBeaconCallback.updateConnectionState(State.CONNECTION_FAIL);
         }
 
@@ -124,6 +152,8 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
 
     @Override
     public void onDisconnect() {
+        Toast.makeText(activity, "disconnected "+sBeacon.getDevice().getName(),
+            Toast.LENGTH_LONG).show();
         mBeaconCallback.updateConnectionState(State.DISCONNECTED);
     }
 
