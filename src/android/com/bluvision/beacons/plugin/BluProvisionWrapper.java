@@ -5,11 +5,13 @@ import org.apache.cordova.CallbackContext;
 import com.bluvision.beeks.sdk.domainobjects.Beacon;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
-import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.app.Activity;
+import android.content.Context;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -61,8 +63,13 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
     //1. Create a profile for scanning -> S-Beacon
     private void updateScanRules(JSONObject message, CallbackContext callbackContext) {
       if (message != null && message.length() > 0) {
-        String beaconType = message.getString(String.valueOf(0));
-        mBeaconInteractor.updateScanRules(beaconType);
+          String beaconType = null;
+          try {
+              beaconType = message.getString(String.valueOf(0));
+              mBeaconInteractor.updateScanRules(beaconType);
+          } catch (JSONException e) {
+              e.printStackTrace();
+          }
       }
     }
 
@@ -139,10 +146,10 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconCallback
     }
 
     @Override
-    public void updateBeaconMetaData(UUID uuid){
+    public void updateBeaconMetaData(String uuid){
       JSONObject result = new JSONObject();
       try {
-          result.put("METADATA_UPDATE",  uuid.toString());
+          result.put("METADATA_UPDATE",  uuid);
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -15,6 +15,7 @@ import com.bluvision.beeks.sdk.util.BeaconManager;
 
 import android.content.Context;
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.widget.Toast;
 
 import java.util.HashMap;
@@ -29,6 +30,7 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
     private boolean scanning;
     private Beacon sBeacon;
     private Context context;
+    private Activity activity;
 
     public void init(Context context, BeaconCallback beaconCallback, Activity activity){
           this.context = context;
@@ -113,13 +115,13 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
             }
 
           if(beacon.getBeaconType()==BeaconType.I_BEACON){
-               Toast.makeText(activity, ((IBeacon)mBeacon).getUuid(),Toast.LENGTH_LONG).show();
-               Toast.makeText(activity, String.valueOf(((IBeacon)mBeacon).getMajor()),Toast.LENGTH_LONG).show();
-               Toast.makeText(activity, String.valueOf(((IBeacon) mBeacon).getMinor()), Toast.LENGTH_LONG).show();
+               Toast.makeText(activity, ((IBeacon)beacon).getUuid(),Toast.LENGTH_LONG).show();
+               Toast.makeText(activity, String.valueOf(((IBeacon)beacon).getMajor()),Toast.LENGTH_LONG).show();
+               Toast.makeText(activity, String.valueOf(((IBeacon) beacon).getMinor()), Toast.LENGTH_LONG).show();
           }
 
           if(beacon.getBeaconType()==BeaconType.EDDYSTONE_URL_BEACON){
-               Toast.makeText(activity,((EddystoneURLBeacon)mBeacon).getURL(),Toast.LENGTH_LONG).show();
+               Toast.makeText(activity,((EddystoneURLBeacon)beacon).getURL(),Toast.LENGTH_LONG).show();
            }
     }
 
@@ -136,7 +138,7 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
         if(connected && authenticated){
             ((SBeacon)sBeacon).alert(true, true);
             ConfigurableBeacon configurableBeacon = (ConfigurableBeacon)sBeacon;
-            mBeaconCallback.updateBeaconMetaData(configurableBeacon.readIBeaconUUID());
+            //mBeaconCallback.updateBeaconMetaData(configurableBeacon.readIBeaconUUID());
             mBeaconCallback.updateBeaconMetaData(configurableBeacon.getDevice().getAddress());
             Toast.makeText(activity, "Connected "+sBeacon.getDevice().getName(),
                 Toast.LENGTH_LONG).show();
@@ -199,7 +201,7 @@ public class BeaconInteractor implements BeaconListener, BeaconConfigurationList
 
     @Override
     public void onReadIBeaconUUID(UUID uuid) {
-        mBeaconCallback.updateBeaconMetaData(uuid);
+        mBeaconCallback.updateBeaconMetaData(uuid.toString());
     }
 
     @Override

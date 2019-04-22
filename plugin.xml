@@ -10,13 +10,21 @@
     </config-file><source-file src="src/ios/BluProvisionWrapper.m" />
     </platform>
     <platform name="android">
-      <framework src="src/android/*.gradle" custom="true" type="gradleReference" />
+      <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="BluProvisionWrapper">
-                <param name="android-package" value="cordova-plugin-bluprovision.BluProvisionWrapper" />
+                <param name="android-package" value="com.bluvision.beacons.plugin.BluProvisionWrapper" />
             </feature>
         </config-file>
-        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/BluProvisionWrapper.java" target-dir="src/cordova-plugin-bluprovision/BluProvisionWrapper" />
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+          <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+          <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+        </config-file>
+        <source-file src="src/android/com/bluvision/beacons/plugin/BluProvisionWrapper.java" target-dir="src/com/bluvision/beacons/plugin/" />
+        <source-file src="src/android/com/bluvision/beacons/plugin/BeaconCallback.java" target-dir="src/com/bluvision/beacons/plugin/" />
+        <source-file src="src/android/com/bluvision/beacons/plugin/BeaconInteractor.java" target-dir="src/com/bluvision/beacons/plugin/" />
+        <source-file src="src/android/com/bluvision/beacons/plugin/BluVisionManagerHandler.java" target-dir="src/com/bluvision/beacons/plugin/" />
+        <source-file src="src/android/com/bluvision/beacons/plugin/State.java" target-dir="src/com/bluvision/beacons/plugin/" />
+        <resource-file src="src/android/libs/app.aar" target="libs/app.aar"/>
     </platform>
 </plugin>
