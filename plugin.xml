@@ -21,10 +21,10 @@
           <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
         </config-file>
         <source-file src="src/android/com/bluvision/beacons/plugin/BluProvisionWrapper.java" target-dir="src/com/bluvision/beacons/plugin/" />
-        <source-file src="src/android/com/bluvision/beacons/plugin/BeaconCallback.java" target-dir="src/com/bluvision/beacons/plugin/" />
+        <source-file src="src/android/com/bluvision/beacons/plugin/BeaconInteractorCallback.java" target-dir="src/com/bluvision/beacons/plugin/" />
         <source-file src="src/android/com/bluvision/beacons/plugin/BeaconInteractor.java" target-dir="src/com/bluvision/beacons/plugin/" />
         <source-file src="src/android/com/bluvision/beacons/plugin/BluVisionManagerHandler.java" target-dir="src/com/bluvision/beacons/plugin/" />
-        <source-file src="src/android/com/bluvision/beacons/plugin/State.java" target-dir="src/com/bluvision/beacons/plugin/" />
-        <resource-file src="src/android/libs/app.aar" target="libs/app.aar"/>
+        <resource-file src="src/android/libs/bluvision.aar" target="libs/bluvision.aar"/>
+        <resource-file src="src/android/libs/bluzone-cloud.aar" target="libs/bluzone-cloud.aar"/>
     </platform>
 </plugin>

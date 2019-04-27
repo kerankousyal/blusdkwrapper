@@ -1,4 +1,4 @@
-def minSdkVersion = 15
+def minSdkVersion = 19
 
 if(cdvMinSdkVersion == null) {
     ext.cdvMinSdkVersion = minSdkVersion;
@@ -14,8 +14,15 @@ repositories{
 }
 
 dependencies {
-    compile(name: 'app', ext: 'aar')
+    compile(name: 'bluvision', ext: 'aar')
+    compile(name: 'bluzone-cloud', ext: 'aar')
     implementation "com.android.support:appcompat-v7:27.0.0"
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.github.satyan:sugar:1.5'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.4.2'
 }
 
 android {

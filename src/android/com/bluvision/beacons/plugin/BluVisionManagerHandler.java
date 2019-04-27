@@ -1,32 +1,16 @@
 package com.bluvision.beacons.plugin;
 
+import com.bluvision.sdk.beacons.BeaconManager;
+
 import android.content.Context;
-import com.bluvision.beeks.sdk.util.BeaconManager;
 
 public class BluVisionManagerHandler {
-    private static BluVisionManagerHandler mBluVisionManagerHandler;
-    private BeaconManager mBeaconManager;
+    private static BeaconManager mBeaconManager;
 
-    private BluVisionManagerHandler(Context context){
-        createManager(context);
-    }
-
-    public static BluVisionManagerHandler getInstance(Context context){
-        if (mBluVisionManagerHandler == null){
-            mBluVisionManagerHandler = new BluVisionManagerHandler(context);
+    public static BeaconManager getInstance(Context context, BeaconManager.BeaconListener listener){
+        if (mBeaconManager == null){
+            mBeaconManager = new BeaconManager(context, listener);
         }
-        return mBluVisionManagerHandler;
-      }
-
-    private void createManager(Context context) {
-        mBeaconManager = new BeaconManager(context);
-    }
-
-    public void stopManager() {
-        mBeaconManager.stop();
-    }
-
-    public BeaconManager getBeaconManager() {
         return mBeaconManager;
     }
 }

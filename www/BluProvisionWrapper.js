@@ -9,21 +9,17 @@ exports.startScan = function (arg0, successCallback, errorCallback) {
 };
 
 exports.stopScan = function (arg0, successCallback, errorCallback) {
-    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'startStop', [arg0]);
+    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'stopScan', [arg0]);
 };
 
-exports.connectToBeacon = function (arg0, successCallback, errorCallback) {
-    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'connectToBeacon', [arg0]);
+exports.provision = function (arg0, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'provision', [arg0]);
 };
 
-exports.disconnectBeacon = function (arg0, successCallback, errorCallback) {
-    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'disconnectBeacon', [arg0]);
+exports.getTemplate = function (arg0, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'getTemplate', [arg0]);
 };
 
-exports.configureBeacon = function (arg0, successCallback, errorCallback) {
-    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'configureBeacon', [arg0]);
-};
-
-exports.updateScanRules = function (arg0, successCallback, errorCallback) {
-    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'updateScanRules', [arg0]);
+exports.signIn = function (arg0, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'signIn', [arg0]);
 };

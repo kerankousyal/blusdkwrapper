@@ -1,377 +1,198 @@
 package com.bluvision.beacons.plugin;
 
-import com.bluvision.beeks.sdk.constants.BeaconType;
-import com.bluvision.beeks.sdk.domainobjects.Beacon;
-import com.bluvision.beeks.sdk.interfaces.BeaconListener;
-import com.bluvision.beeks.sdk.util.BeaconManager;
-import com.bluvision.beeks.sdk.constants.BeaconType;
-import com.bluvision.beeks.sdk.domainobjects.Beacon;
-import com.bluvision.beeks.sdk.domainobjects.ConfigurableBeacon;
-import com.bluvision.beeks.sdk.domainobjects.EddystoneURLBeacon;
-import com.bluvision.beeks.sdk.domainobjects.IBeacon;
-import com.bluvision.beeks.sdk.domainobjects.SBeacon;
-import com.bluvision.beeks.sdk.interfaces.BeaconConfigurationListener;
-import com.bluvision.beeks.sdk.util.BeaconManager;
+import com.bluvision.sdk.beacons.Beacon;
+import com.bluvision.sdk.beacons.BeaconManager;
+import com.bluvision.sdk.beacons.Blufi;
+import com.bluvision.sdk.beacons.SBeacon;
+import com.bluvision.sdk.cloud.Device;
+import com.bluvision.sdk.cloud.Error;
+import com.bluvision.sdk.cloud.Location;
+import com.bluvision.sdk.cloud.Provisioner;
+import com.bluvision.sdk.cloud.Template;
+import com.bluvision.sdk.cloud.User;
+import com.bluvision.sdk.cloud.callbacks.LocationListCallback;
+import com.bluvision.sdk.cloud.callbacks.ProvisioningCallback;
+import com.bluvision.sdk.cloud.callbacks.UserCallback;
+import com.bluvision.sdk.constants.Distance;
+import com.bluvision.sdk.utilities.ErrorCode;
 
-import android.content.Context;
 import android.app.Activity;
-import android.bluetooth.BluetoothDevice;
-import android.widget.Toast;
+import android.content.Context;
+import android.util.Log;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class BeaconInteractor implements BeaconListener, BeaconConfigurationListener{
+public class BeaconInteractor implements BeaconManager.BeaconListener {
     private BeaconManager mBeaconManager;
     private Map<String, Beacon> beaconList = new HashMap<>();
-    private BeaconCallback mBeaconCallback;
+    private Map<String, Template> templateList = new HashMap<>();
+    private BeaconInteractorCallback mBeaconCallback;
     private boolean scanning;
-    private Beacon sBeacon;
     private Context context;
     private Activity activity;
 
-    public void init(Context context, BeaconCallback beaconCallback, Activity activity){
-          this.context = context;
-          this.activity = activity;
-          mBeaconManager = BluVisionManagerHandler.getInstance(context).getBeaconManager();
-          mBeaconManager.addBeaconListener(this);
-          mBeaconManager.addRuleToIncludeScanByType(BeaconType.S_BEACON);
-          mBeaconCallback = beaconCallback;
+    public void init(Context context, BeaconInteractorCallback beaconCallback, Activity activity) {
+        this.context = context;
+        this.activity = activity;
+        mBeaconManager = BluVisionManagerHandler.getInstance(context, this);
+        //mBeaconManager.addRuleToIncludeScanByType(BeaconType.);
+        mBeaconCallback = beaconCallback;
     }
 
-    public void updateScanRules(String type){
-      if(type.equals(BeaconType.I_BEACON.getStringType())){
-        mBeaconManager.addRuleToIncludeScanByType(BeaconType.I_BEACON);
-      } else if (type.equals(BeaconType.S_BEACON.getStringType())){
-        mBeaconManager.addRuleToIncludeScanByType(BeaconType.S_BEACON);
-      } else if (type.equals(BeaconType.CONFIGURABLE_BEACON.getStringType())){
-        mBeaconManager.addRuleToIncludeScanByType(BeaconType.CONFIGURABLE_BEACON);
-      } else if (type.equals(BeaconType.EDDYSTONE.getStringType())){
-        mBeaconManager.addRuleToIncludeScanByType(BeaconType.EDDYSTONE);
-      } else if (type.equals(BeaconType.EDDYSTONE_UID_BEACON.getStringType())){
-        mBeaconManager.addRuleToIncludeScanByType(BeaconType.EDDYSTONE_UID_BEACON);
-      } else if (type.equals(BeaconType.EDDYSTONE_TLM_BEACON.getStringType())){
-        mBeaconManager.addRuleToIncludeScanByType(BeaconType.EDDYSTONE_TLM_BEACON);
-      } else if (type.equals(BeaconType.EDDYSTONE_URL_BEACON.getStringType())){
-        mBeaconManager.addRuleToIncludeScanByType(BeaconType.EDDYSTONE_URL_BEACON);
-      } else {
-        mBeaconManager.addRuleToIncludeScanByType(BeaconType.MOTION);
-      }
-    }
-
-    public void startScan(){
-      mBeaconManager.startScan();
-      scanning = true;
+    public void startScan() {
+        if (mBeaconManager != null && !scanning) {
+            mBeaconManager.startScanning();
+            scanning = true;
+        }
     }
 
     public void stopScan() {
-        if (scanning) {
-            mBeaconManager.stopScan();
+        if (mBeaconManager != null && scanning) {
+            mBeaconManager.stopScanning();
             scanning = false;
         }
     }
 
     @Override
-    public void onBeaconFound(final Beacon beacon) {
-      activity.runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-              if (beacon != null) {
-                  beaconList.put(beacon.getDevice().getAddress(), beacon);
-                  if (mBeaconCallback != null){
-                      mBeaconCallback.beaconFound(beacon);
-                  }
-              }
-          }
-      });
-    }
-
-    @Override
-    public void bluetoothIsNotEnabled() {
-        Toast.makeText(activity, "Please enable bluetooth",Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onFailedToUpdateFirmware(int i) {
-
-    }
-
-    public void connectToBeacon(String address, String type, String password){
-          Beacon beacon = beaconList.get(address);
-            if(type.equals(BeaconType.S_BEACON.getStringType())){
-                sBeacon = (SBeacon)beacon;
+    public void onFound(final Beacon beacon) {
+        if (beacon != null) {
+            beaconList.put(beacon.getBluetoothDevice().getAddress(), beacon);
+            if (mBeaconCallback != null) {
+                mBeaconCallback.beaconFound(beacon);
             }
-            ConcurrentHashMap<BeaconType,Beacon> beacons = beacon.getAssociations();
-            for (Beacon beaconAssociated : beacons.values()){
-                if(beaconAssociated.getBeaconType() == BeaconType.S_BEACON){
-                    sBeacon = (SBeacon)beaconAssociated;
-                }
-            }
-            if(sBeacon != null){
-                ((SBeacon)sBeacon).setBeaconConfigurationListener(this);
-                ((SBeacon)sBeacon).connect(context, password);
-            }
-
-          if(beacon.getBeaconType()==BeaconType.I_BEACON){
-               Toast.makeText(activity, ((IBeacon)beacon).getUuid(),Toast.LENGTH_LONG).show();
-               Toast.makeText(activity, String.valueOf(((IBeacon)beacon).getMajor()),Toast.LENGTH_LONG).show();
-               Toast.makeText(activity, String.valueOf(((IBeacon) beacon).getMinor()), Toast.LENGTH_LONG).show();
-          }
-
-          if(beacon.getBeaconType()==BeaconType.EDDYSTONE_URL_BEACON){
-               Toast.makeText(activity,((EddystoneURLBeacon)beacon).getURL(),Toast.LENGTH_LONG).show();
-           }
-    }
-
-    public void disconnectBeacon(String address){
-          Beacon beacon = beaconList.get(address);
-          if(beacon.getDevice().getBondState() == BluetoothDevice.BOND_BONDED &&
-            beacon.getBeaconType() == BeaconType.S_BEACON){
-              ((SBeacon)beacon).disconnect();
-          }
-    }
-
-    @Override
-    public void onConnect(boolean connected, boolean authenticated) {
-        if(connected && authenticated){
-            ((SBeacon)sBeacon).alert(true, true);
-            ConfigurableBeacon configurableBeacon = (ConfigurableBeacon)sBeacon;
-            //mBeaconCallback.updateBeaconMetaData(configurableBeacon.readIBeaconUUID());
-            mBeaconCallback.updateBeaconMetaData(configurableBeacon.getDevice().getAddress());
-            Toast.makeText(activity, "Connected "+sBeacon.getDevice().getName(),
-                Toast.LENGTH_LONG).show();
-            mBeaconCallback.updateConnectionState(State.CONNECTED);
-        }else{
-            Toast.makeText(activity, "Connection fail "+sBeacon.getDevice().getName(),
-                Toast.LENGTH_LONG).show();
-            mBeaconCallback.updateConnectionState(State.CONNECTION_FAIL);
         }
 
-    }
-
-
-    @Override
-    public void onDisconnect() {
-        Toast.makeText(activity, "disconnected "+sBeacon.getDevice().getName(),
-            Toast.LENGTH_LONG).show();
-        mBeaconCallback.updateConnectionState(State.DISCONNECTED);
-    }
-
-    @Override
-    public void onCommandToNotConnectedBeacon() {
 
     }
 
     @Override
-    public void onReadConnectionSettings(int i, int i1, int i2, int i3) {
+    public void onLost(final Beacon beacon) {
+        if (beacon != null) {
+            beaconList.remove(beacon.getBluetoothDevice().getAddress());
+            if (mBeaconCallback != null) {
+                mBeaconCallback.beaconLost(beacon);
+            }
+        }
+    }
+
+    @Override
+    public void onChange(Beacon beacon, Distance distance) {
 
     }
 
     @Override
-    public void onSetConnectionSettings(int i, int i1, int i2, int i3) {
+    public void onScanningFail(int errorCode) {
+        if (errorCode == ErrorCode.BEACON_SCANNER_BLUETOOTH_NOT_ENABLED) {
+            mBeaconCallback.enableBluetooth();
+        }
+
+        if (errorCode == ErrorCode.BEACON_SCANNER_INSUFFICIENT_PERMISSIONS) {
+            mBeaconCallback.requestLocationPermissions();
+        }
+    }
+
+    public void signIn(String token) {
+        User.AuthenticateWithAPIToken(token, context, new UserCallback() {
+            @Override
+            public void onComplete(User user, Error error) {
+                Log.i("authenticate", "User " + user + "error " + error);
+                if (user != null) {
+                    mBeaconCallback.signInSuccess(user);
+                    startScan();
+                } else {
+                    mBeaconCallback.signInFailure(error);
+                    Log.i("authenticate", error.getMessage());
+                }
+            }
+        });
+    }
+
+    public void loadTemplates(String address) {
+        SBeacon beacon = (SBeacon) beaconList.get(address);
+        if (beacon != null) {
+            if (beacon instanceof Blufi) {
+                Template.getBlufiTemplates(callback);
+            } else {
+                Template.getBeaconTemplates(beacon.getIdentifier().toString(), callback);
+            }
+        }
+    }
+
+    Template.TemplateListCallback callback = new Template.TemplateListCallback() {
+        @Override
+        public void onComplete(List<? extends Template> list, Error error) {
+            if (error == null) {
+                //There are no templates for this device, please create one to continue
+                mBeaconCallback.loadTemplateSucess(list);
+                for (Template template : list) {
+                    templateList.put("" + template.getTemplateId(), template);
+                }
+            } else {
+                if (error.getCode() > 50000) {
+                    mBeaconCallback.loadTemplateError("This device cannot be provisioned\n\nPlease contact Bluvision support for assistance");
+
+                    if (error.getCode() == 50404) {
+                        mBeaconCallback.loadTemplateError("Device already Provisioned\n\nThis Device is already provisioned for use with " +
+                                                          "another project");
+                    }
+                } else {
+                    mBeaconCallback.loadTemplateError(error.getMessage());
+                    Log.e("templates", error.getMessage());
+                }
+            }
+        }
+    };
+
+    private void getLocations(final String beacon, final int template) {
+        User.getCurrentUser().getCurrentProject().getLocations(new LocationListCallback() {
+            @Override
+            public void onComplete(List<Location> list, Error error) {
+                if (list == null || list.size() == 0) {
+                    Log.e("error", "for this sample we need a location");
+                    return;
+                }
+                provision(list.get(0), beacon, template);
+            }
+        });
 
     }
 
-    @Override
-    public void onFailedToReadConnectionSettings() {
+    private void provision(Location location, String beacon, int template) {
+        SBeacon mDevice = (SBeacon) beaconList.get(beacon);
+        Provisioner mProvisioner = new Provisioner(mDevice, template, activity);
 
+        mProvisioner.setLocationIdentifier(location.getLocationId());
+        mProvisioner.setLatitude(25.8); // Get this from a map marker
+        mProvisioner.setLongitude(80.2);
+        mProvisioner.setDeviceName(mDevice.getName());
+
+        mProvisioner.startProvisioning(new ProvisioningCallback() {
+            @Override
+            public void onSuccess(Device device) {
+                mBeaconCallback.provisionSuccess();
+                Log.i("provision", "device provisioned");
+            }
+
+            @Override
+            public void onError(Error error) {
+                mBeaconCallback.provisionError(error.getMessage());
+            }
+
+            @Override
+            public void onStatusChange(String s) {
+                mBeaconCallback.provisionStatusChange(s);
+            }
+
+            @Override
+            public void onDescriptionChange(String s) {
+                mBeaconCallback.provisiondescriptionChange(s);
+            }
+        });
     }
 
-    @Override
-    public void onFailedToSetConnectionSettings() {
-
+    public void provisionBeacon(String beacon, int template) {
+        getLocations(beacon, template);
     }
-
-    @Override
-    public void onReadTemperature(double v) {
-
-    }
-
-    @Override
-    public void onFailedToReadTemperature() {
-
-    }
-
-    @Override
-    public void onConnectionExist() {
-
-    }
-
-    @Override
-    public void onReadIBeaconUUID(UUID uuid) {
-        mBeaconCallback.updateBeaconMetaData(uuid.toString());
-    }
-
-    @Override
-    public void onSetIBeaconUUID(UUID uuid) {
-
-    }
-
-    @Override
-    public void onFailedToReadIBeaconUUID() {
-
-    }
-
-    @Override
-    public void onFailedToSetIBeaconUUID() {
-
-    }
-
-    @Override
-    public void onReadIBeaconMajorAndMinor(int i, int i1) {
-
-    }
-
-    @Override
-    public void onSetIBeaconMajorAndMinor(int i, int i1) {
-
-    }
-
-    @Override
-    public void onFailedToReadIBeaconMajorAndMinor() {
-
-    }
-
-    @Override
-    public void onFailedToSetIBeaconMajorAndMinor() {
-
-    }
-
-    @Override
-    public void onReadEddystoneUID(byte[] bytes, byte[] bytes1) {
-
-    }
-
-    @Override
-    public void onSetEddystoneUID(byte[] bytes, byte[] bytes1) {
-
-    }
-
-    @Override
-    public void onFailedToReadEddystoneUID() {
-
-    }
-
-    @Override
-    public void onFailedToSetEddystoneUID() {
-
-    }
-
-    @Override
-    public void onReadEddystoneURL(String s) {
-
-    }
-
-    @Override
-    public void onSetEddystoneURL(String s) {
-
-    }
-
-    @Override
-    public void onFailedToReadEddystoneURL() {
-
-    }
-
-    @Override
-    public void onFailedToSetEddystoneURL() {
-
-    }
-
-    @Override
-    public void onReadDeviceStatus(float v, float v1, short i) {
-
-    }
-
-    @Override
-    public void onFailedToReadDeviceStatus() {
-
-    }
-
-    @Override
-    public void onReadFrameTypeIntervalTxPower(byte b, byte b1, byte b2, float v, float v1) {
-
-    }
-
-    @Override
-    public void onSetFrameTypeIntervalTxPower(byte b, byte b1, byte b2, float v, float v1) {
-
-    }
-
-    @Override
-    public void onFailedToReadFrameTypeIntervalTxPower() {
-
-    }
-
-    @Override
-    public void onFailedToSetFrameTypeIntervalTxPower() {
-
-    }
-
-    @Override
-    public void onSetFrameTypeConnectionRates(byte b, byte b1, byte b2) {
-
-    }
-
-    @Override
-    public void onReadFrameTypeConnectionRates(byte b, byte b1, byte b2) {
-
-    }
-
-    @Override
-    public void onFailedToReadFrameTypeConnectionRates() {
-
-    }
-
-    @Override
-    public void onFailedToSetFrameTypeConnectionRates() {
-
-    }
-
-    @Override
-    public void onReadAdvertisementSettings(float v, float v1, float v2) {
-
-    }
-
-    @Override
-    public void onSetAdvertisementSettings(float v, float v1, float v2) {
-
-    }
-
-    @Override
-    public void onFailedToReadAdvertisementSettings() {
-
-    }
-
-    @Override
-    public void onFailedToSetAdvertisementSettings() {
-
-    }
-
-    @Override
-    public void onSetAccelerometerConfiguration() {
-
-    }
-
-    @Override
-    public void onFailedToSetAccelerometerConfiguration() {
-
-    }
-
-    @Override
-    public void onSetPassword(boolean b) {
-
-    }
-
-    @Override
-    public void onUpdateFirmware(double v) {
-
-    }
-
-    //When BeaconInteractor is being destroyed
-    public void clear() {
-       mBeaconManager.removeBeaconListener(this);
-    }
-
 }
