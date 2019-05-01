@@ -59,8 +59,9 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
         } else if (action.equals("provision")) {
             JSONObject data = args.getJSONObject(0);
             String beacon = data.getString("address");
+            String beaconName = data.getString("name");
             int template = data.getInt("templateId");
-            this.provisionBeacon(callbackContext, beacon, template);
+            this.provisionBeacon(beacon, template, beaconName);
             //this.provisionBeacon(beacon, template);
             return true;
         } else if (action.equals("startScan")) {
@@ -82,10 +83,10 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
         mBeaconInteractor.init(context, this, activity);
     }
 
-    private void provisionBeacon(CallbackContext callbackContext, String beacon, int template) {
+    private void provisionBeacon(CallbackContext callbackContext, String beacon, int template, String beaconName) {
     //private void provisionBeacon(String beacon, int template) {
         connectionCallbackContext = callbackContext;
-        mBeaconInteractor.provisionBeacon(beacon, template);
+        mBeaconInteractor.provisionBeacon(beacon, template, beaconName);
     }
     private void getTemplates(CallbackContext callbackContext, String address) {
     //private void getTemplates(String address) {

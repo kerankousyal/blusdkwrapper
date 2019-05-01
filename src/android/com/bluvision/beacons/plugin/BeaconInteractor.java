@@ -145,7 +145,7 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
         }
     };
 
-    private void getLocations(final String beacon, final int template) {
+    private void getLocations(final String beacon, final int template, final String beaconName) {
         User.getCurrentUser().getCurrentProject().getLocations(new LocationListCallback() {
             @Override
             public void onComplete(List<Location> list, Error error) {
@@ -153,20 +153,20 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
                     Log.e("error", "for this sample we need a location");
                     return;
                 }
-                provision(list.get(0), beacon, template);
+                provision(list.get(0), beacon, template, beaconName);
             }
         });
 
     }
 
-    private void provision(Location location, String beacon, int template) {
+    private void provision(Location location, String beacon, int template, String beaconName) {
         SBeacon mDevice = (SBeacon) beaconList.get(beacon);
         Provisioner mProvisioner = new Provisioner(mDevice, template, activity);
 
         mProvisioner.setLocationIdentifier(location.getLocationId());
         mProvisioner.setLatitude(25.8); // Get this from a map marker
         mProvisioner.setLongitude(80.2);
-        mProvisioner.setDeviceName(mDevice.getName());
+        mProvisioner.setDeviceName(beaconName);
 
         mProvisioner.startProvisioning(new ProvisioningCallback() {
             @Override
@@ -192,7 +192,7 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
         });
     }
 
-    public void provisionBeacon(String beacon, int template) {
-        getLocations(beacon, template);
+    public void provisionBeacon(String beacon, int template, String beaconName) {
+        getLocations(beacon, template, beaconName);
     }
 }
