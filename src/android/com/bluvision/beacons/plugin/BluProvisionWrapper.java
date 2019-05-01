@@ -61,7 +61,7 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
             String beacon = data.getString("address");
             String beaconName = data.getString("name");
             int template = data.getInt("templateId");
-            this.provisionBeacon(beacon, template, beaconName);
+            this.provisionBeacon(callbackContext, beacon, template, beaconName);
             //this.provisionBeacon(beacon, template);
             return true;
         } else if (action.equals("startScan")) {
