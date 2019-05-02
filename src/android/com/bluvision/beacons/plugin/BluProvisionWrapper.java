@@ -58,10 +58,14 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
             return true;
         } else if (action.equals("provision")) {
             JSONObject data = args.getJSONObject(0);
-            String beacon = data.getString("address");
+            String beacon = data.getString("id");
             String beaconName = data.getString("name");
+            String notes = data.getString("notes");
             int template = data.getInt("templateId");
-            this.provisionBeacon(callbackContext, beacon, template, beaconName);
+            if(notes == null){
+              notes = "";
+            }
+            this.provisionBeacon(callbackContext, beacon, template, beaconName, notes);
             //this.provisionBeacon(beacon, template);
             return true;
         } else if (action.equals("startScan")) {
@@ -83,15 +87,15 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
         mBeaconInteractor.init(context, this, activity);
     }
 
-    private void provisionBeacon(CallbackContext callbackContext, String beacon, int template, String beaconName) {
+    private void provisionBeacon(CallbackContext callbackContext, String beacon, int template, String beaconName, String notes) {
     //private void provisionBeacon(String beacon, int template) {
         connectionCallbackContext = callbackContext;
-        mBeaconInteractor.provisionBeacon(beacon, template, beaconName);
+        mBeaconInteractor.provisionBeacon(beacon, template, beaconName, notes);
     }
-    private void getTemplates(CallbackContext callbackContext, String address) {
+    private void getTemplates(CallbackContext callbackContext, String id) {
     //private void getTemplates(String address) {
         templateCallbackContext = callbackContext;
-        mBeaconInteractor.loadTemplates(address);
+        mBeaconInteractor.loadTemplates(id);
     }
 
     private void signIn(CallbackContext callbackContext, String token) {
@@ -117,6 +121,13 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
         try {
             result.put("code",  "Beacon_Found");
             result.put("name",  beacon.getBluetoothDevice().getName());
+            if (beacon instanceof SBeacon) {
+                BigInteger sid64 = ((SBeacon) beacon).getIdentifier();
+                String identifier = sid64.toString();
+                String hexIdentifier = sid64.toString(16).toUpperCase();
+                result.put("id", identifier);
+                result.put("hex", hexIdentifier);
+            }
             result.put("address",  beacon.getBluetoothDevice().getAddress());
             result.put("type",  beacon.getTypeString());
             //callback.wrapperResults("BEACON", result.toString());
@@ -136,6 +147,13 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
         try {
             result.put("code",  "Beacon_Lost");
             result.put("name",  beacon.getBluetoothDevice().getName());
+            if (beacon instanceof SBeacon) {
+                BigInteger sid64 = ((SBeacon) beacon).getIdentifier();
+                String identifier = sid64.toString();
+                String hexIdentifier = sid64.toString(16).toUpperCase();
+                result.put("id", identifier);
+                result.put("hex", hexIdentifier);
+            }
             result.put("address",  beacon.getBluetoothDevice().getAddress());
             result.put("type",  beacon.getTypeString());
             //callback.wrapperResults("BEACON", result.toString());
