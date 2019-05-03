@@ -1,6 +1,8 @@
 package com.bluvision.beacons.plugin;
 
 import com.bluvision.sdk.beacons.Beacon;
+import com.bluvision.sdk.beacons.Blufi;
+import com.bluvision.sdk.beacons.SBeacon;
 import com.bluvision.sdk.cloud.Error;
 import com.bluvision.sdk.cloud.Template;
 import com.bluvision.sdk.cloud.User;
@@ -17,6 +19,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Context;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -39,10 +42,12 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
     private CallbackContext scanCallbackContext;
     private CallbackContext connectionCallbackContext;
     private CallbackContext templateCallbackContext;
+    private String deviceType = "SBeacon";
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("init")) {
+            deviceType = args.getString(0);
             this.init(callbackContext);
             //this.init();
             return true;
@@ -119,17 +124,22 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
     public void beaconFound(Beacon beacon){
         JSONObject result = new JSONObject();
         try {
-            result.put("code",  "Beacon_Found");
-            result.put("name",  beacon.getBluetoothDevice().getName());
-            if (beacon instanceof SBeacon) {
+            if(deviceType == beacon.getTypeString()){
+              result.put("code",  "Beacon_Found");
+              result.put("name",  beacon.getBluetoothDevice().getName());
+              if (beacon instanceof SBeacon) {
                 BigInteger sid64 = ((SBeacon) beacon).getIdentifier();
                 String identifier = sid64.toString();
                 String hexIdentifier = sid64.toString(16).toUpperCase();
                 result.put("id", identifier);
                 result.put("hex", hexIdentifier);
+                result.put("address",  beacon.getBluetoothDevice().getAddress());
+                result.put("type",  beacon.getTypeString());
+              }
+              if (beacon instanceof Blufi){
+                result.put("type",  beacon.getTypeString());
+              }
             }
-            result.put("address",  beacon.getBluetoothDevice().getAddress());
-            result.put("type",  beacon.getTypeString());
             //callback.wrapperResults("BEACON", result.toString());
         } catch (JSONException e) {
             e.printStackTrace();
@@ -145,6 +155,7 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
     public void beaconLost(Beacon beacon) {
         JSONObject result = new JSONObject();
         try {
+          if(deviceType == beacon.getTypeString()){
             result.put("code",  "Beacon_Lost");
             result.put("name",  beacon.getBluetoothDevice().getName());
             if (beacon instanceof SBeacon) {
@@ -153,9 +164,13 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
                 String hexIdentifier = sid64.toString(16).toUpperCase();
                 result.put("id", identifier);
                 result.put("hex", hexIdentifier);
+                result.put("address",  beacon.getBluetoothDevice().getAddress());
+                result.put("type",  beacon.getTypeString());
             }
-            result.put("address",  beacon.getBluetoothDevice().getAddress());
-            result.put("type",  beacon.getTypeString());
+            if (beacon instanceof Blufi){
+                result.put("type",  beacon.getTypeString());
+            }
+          }
             //callback.wrapperResults("BEACON", result.toString());
         } catch (JSONException e) {
             e.printStackTrace();
