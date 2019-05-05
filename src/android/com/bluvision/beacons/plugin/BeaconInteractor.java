@@ -57,22 +57,24 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
 
     @Override
     public void onFound(final Beacon beacon) {
-      if (beacon != null && beacon instanceof SBeacon) {
-          beaconList.put(((SBeacon) beacon).getIdentifier().toString(), beacon);
-          if (mBeaconCallback != null) {
-              mBeaconCallback.beaconFound(beacon);
-          }
-      }
+        if (beacon instanceof SBeacon) {
+            beaconList.put(((SBeacon) beacon).getIdentifier().toString(), beacon);
+            if (mBeaconCallback != null) {
+                mBeaconCallback.beaconFound(beacon);
+            }
+        }
+
+
     }
 
     @Override
     public void onLost(final Beacon beacon) {
-      if (beacon != null && beacon instanceof SBeacon) {
-          beaconList.remove(((SBeacon) beacon).getIdentifier().toString());
-          if (mBeaconCallback != null) {
-              mBeaconCallback.beaconLost(beacon);
-          }
-      }
+        if (beacon instanceof SBeacon) {
+            beaconList.remove(((SBeacon) beacon).getIdentifier().toString());
+            if (mBeaconCallback != null) {
+                mBeaconCallback.beaconLost(beacon);
+            }
+        }
     }
 
     @Override
@@ -109,6 +111,7 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
 
     public void loadTemplates(String id) {
         SBeacon beacon = (SBeacon) beaconList.get(id);
+        templateList = new HashMap<>();
         if (beacon != null) {
             if (beacon instanceof Blufi) {
                 Template.getBlufiTemplates(callback);
@@ -118,7 +121,7 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
         }
     }
 
-    Template.TemplateListCallback callback = new Template.TemplateListCallback() {
+    private Template.TemplateListCallback callback = new Template.TemplateListCallback() {
         @Override
         public void onComplete(List<? extends Template> list, Error error) {
             if (error == null) {

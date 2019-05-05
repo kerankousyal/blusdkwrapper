@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -124,7 +125,10 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
     public void beaconFound(Beacon beacon){
         JSONObject result = new JSONObject();
         try {
-            if(deviceType == beacon.getTypeString()){
+          Log.d(BluProvisionWrapper.class.getSimpleName(), "Beacon found type expected "
+                    +deviceType+" found "+beacon.getTypeString());
+            if(deviceType.equals(beacon.getTypeString())){
+              Log.d(BluProvisionWrapper.class.getSimpleName(), "Beacon Found type: "+deviceType);
               result.put("code",  "Beacon_Found");
               result.put("name",  beacon.getBluetoothDevice().getName());
               if (beacon instanceof SBeacon) {
@@ -139,6 +143,7 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
               if (beacon instanceof Blufi){
                 result.put("type",  beacon.getTypeString());
               }
+              Log.d(BluProvisionWrapper.class.getSimpleName(), "Beacon found "+ result.toString());
             }
             //callback.wrapperResults("BEACON", result.toString());
         } catch (JSONException e) {
@@ -155,7 +160,10 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
     public void beaconLost(Beacon beacon) {
         JSONObject result = new JSONObject();
         try {
-          if(deviceType == beacon.getTypeString()){
+          Log.d(BluProvisionWrapper.class.getSimpleName(), "Beacon lost type expected "
+                    +deviceType+" found "+beacon.getTypeString());
+          if(deviceType.equals(beacon.getTypeString())){
+            Log.d(BluProvisionWrapper.class.getSimpleName(), "Beacon lost type: "+deviceType);
             result.put("code",  "Beacon_Lost");
             result.put("name",  beacon.getBluetoothDevice().getName());
             if (beacon instanceof SBeacon) {
@@ -170,6 +178,7 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
             if (beacon instanceof Blufi){
                 result.put("type",  beacon.getTypeString());
             }
+            Log.d(BluProvisionWrapper.class.getSimpleName(), "Beacon lost "+ result.toString());
           }
             //callback.wrapperResults("BEACON", result.toString());
         } catch (JSONException e) {
