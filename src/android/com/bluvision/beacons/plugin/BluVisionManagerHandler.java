@@ -13,4 +13,8 @@ public class BluVisionManagerHandler {
         }
         return mBeaconManager;
     }
+
+    public static void destroyManager(){
+        mBeaconManager = null;
+    }
 }

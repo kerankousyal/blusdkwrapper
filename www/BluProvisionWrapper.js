@@ -23,3 +23,7 @@ exports.getTemplate = function (arg0, successCallback, errorCallback) {
 exports.signIn = function (arg0, successCallback, errorCallback) {
     exec(successCallback, errorCallback, 'BluProvisionWrapper', 'signIn', [arg0]);
 };
+
+exports.signOut = function (arg0, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'signOut', [arg0]);
+};

@@ -36,12 +36,13 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
     public void init(Context context, BeaconInteractorCallback beaconCallback, Activity activity) {
         this.context = context;
         this.activity = activity;
-        mBeaconManager = BluVisionManagerHandler.getInstance(context, this);
-        //mBeaconManager.addRuleToIncludeScanByType(BeaconType.);
         mBeaconCallback = beaconCallback;
     }
 
     public void startScan() {
+        if(mBeaconManager == null) {
+            mBeaconManager = BluVisionManagerHandler.getInstance(context, this);
+        }
         if (mBeaconManager != null && !scanning) {
             mBeaconManager.startScanning();
             scanning = true;
@@ -52,6 +53,8 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
         if (mBeaconManager != null && scanning) {
             mBeaconManager.stopScanning();
             scanning = false;
+            BluVisionManagerHandler.destroyManager();
+            mBeaconManager = null;
         }
     }
 
@@ -107,6 +110,13 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
                 }
             }
         });
+    }
+
+    public void signOut() {
+        User user = User.getCurrentUser();
+        if(user != null){
+            user.signOut();
+        }
     }
 
     public void loadTemplates(String id) {

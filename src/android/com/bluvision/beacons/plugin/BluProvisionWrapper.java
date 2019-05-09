@@ -57,6 +57,10 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
             this.signIn(callbackContext, token);
             //this.signIn(token);
             return true;
+        } else if (action.equals("signOut")) {
+            //this.signIn(callbackContext);
+            this.signOut();
+            return true;
         } else if (action.equals("getTemplate")) {
             String beacon = args.getString(0);
             this.getTemplates(callbackContext, beacon);
@@ -108,6 +112,11 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
     //private void signIn(String token) {
         scanCallbackContext = callbackContext;
         mBeaconInteractor.signIn(token);
+    }
+
+    private void signOut() {
+        mBeaconInteractor.signOut();
+        stopScan();
     }
 
     private void startScan(CallbackContext callbackContext) {
