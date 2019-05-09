@@ -116,6 +116,7 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
         User user = User.getCurrentUser();
         if(user != null){
             user.signOut();
+            beaconList.clear();
         }
     }
 
