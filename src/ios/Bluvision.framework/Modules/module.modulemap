@@ -1,6 +1,0 @@
-framework module Bluvision {
-  umbrella header "Bluvision.h"
-
-  export *
-  module * { export * }
-}

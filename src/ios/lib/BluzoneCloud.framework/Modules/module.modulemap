@@ -1,0 +1,6 @@
+framework module BluzoneCloud {
+  umbrella header "BluzoneCloud.h"
+
+  export *
+  module * { export * }
+}
