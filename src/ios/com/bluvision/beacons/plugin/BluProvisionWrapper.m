@@ -1,16 +1,24 @@
 /********* BluProvisionWrapper.m Cordova Plugin Implementation *******/
 
 #import <Cordova/CDV.h>
+#import <Bluvision/BLUBluFi.h>
+#import "BeaconInteractor.h"
 
-@interface BluProvisionWrapper : CDVPlugin {
- 	BeaconInteractor *interactor = nil;
- 	NSString *deviceType = nil;
- 	CDVInvokedUrlCommand *scanCommand = nil;
- 	CDVInvokedUrlCommand *connectioncommand = nil;
- 	CDVInvokedUrlCommand *templateCommand = nil;
+@interface BluProvisionWrapper : CDVPlugin <BeaconInteractorDelegate> {
+    BeaconInteractor *interactor;
+    NSString *deviceType;
+    CDVInvokedUrlCommand *scanCommand;
+    CDVInvokedUrlCommand *connectioncommand;
+    CDVInvokedUrlCommand *templateCommand;
 }
 
-- (void)coolMethod:(CDVInvokedUrlCommand*)command;
+- (void)init:(CDVInvokedUrlCommand*)command;
+- (void)signIn:(CDVInvokedUrlCommand*)command;
+- (void)startScan:(CDVInvokedUrlCommand*)command;
+- (void)stopScan:(CDVInvokedUrlCommand*)command;
+- (void)getTemplates:(CDVInvokedUrlCommand*)command;
+- (void)provision:(CDVInvokedUrlCommand*)command;
+
 @end
 
 @implementation BluProvisionWrapper
@@ -18,13 +26,13 @@
 - (void)init:(CDVInvokedUrlCommand*)command {
 
 	scanCommand = command;
-    NSString* deviceType = [command.arguments objectAtIndex:0];
-    if (deviceType != nil && deviceType.length > 0) {
-        self.deviceType = deviceType;
+    NSString* device = [command.arguments objectAtIndex:0];
+    if (device != nil && device.length > 0) {
+        deviceType = device;
     } else {
-        self.deviceType = @"SBeacon";
+        deviceType = @"SBeacon";
     }
-    self.interactor = [[BeaconInteractor alloc] initWithDelegate:self];
+    interactor = [[BeaconInteractor alloc] initWithDelegate:self];
 }
 
 - (void)signIn:(CDVInvokedUrlCommand*)command {
@@ -32,20 +40,20 @@
 	scanCommand = command;
     NSString* token = [command.arguments objectAtIndex:0];
     if (token != nil) {
-    	[self.interactor signIn:token];
+    	[interactor signIn:token];
     }
 }
 
 - (void)startScan:(CDVInvokedUrlCommand*)command {
 
 	scanCommand = command;
-    [self.interactor startScan];
+    [interactor startScan];
 }
 
 - (void)stopScan:(CDVInvokedUrlCommand*)command {
 
 	scanCommand = nil;
-    [self.interactor stopScan];
+    [interactor stopScan];
 }
 
 - (void)getTemplates:(CDVInvokedUrlCommand*)command {
@@ -53,21 +61,21 @@
 	templateCommand = command;
     NSString* beacondentifier = [command.arguments objectAtIndex:0];
     if (beacondentifier != nil) {
-    	[self.interactor loadTemplates:beacondentifier];
+    	[interactor loadTemplates:beacondentifier];
     }
 }
 
 - (void)provision:(CDVInvokedUrlCommand*)command {
 
 	connectioncommand = command;
-    NSDictionary* data = [command.arguments objectAtIndex:0];
-    NSString* templateId = [dictionary valueForKey:@"templateId"];
+    NSDictionary* dictionary = [command.arguments objectAtIndex:0];
+    NSString* template = [dictionary valueForKey:@"templateId"];
     NSString* notes = [dictionary valueForKey:@"notes"];
     if (notes == nil) {
     	notes = @"";
     }
-    if (templateId != nil) {
-    	[self.interactor provisionBeaconForTemplate:templateId notes:notes];
+    if (template != nil) {
+    	[interactor provisionBeaconForTemplate:[template intValue] notes:notes];
     }
 }
 
@@ -83,7 +91,7 @@
     [dictionary setValue:user.currentProject.name forKey:@"project_name"];
     [dictionary setValue:user.currentProject forKey:@"current_project"];
 
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
 }
 
@@ -94,51 +102,51 @@
     [dictionary setValue:[NSString stringWithFormat:@"%ld", (long)error.code] forKey:@"error_code"];
     [dictionary setValue:error.localizedDescription forKey:@"error_message"];
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
     scanCommand = nil;
 }
 
 - (void)beaconFound:(BLUSBeacon *)beacon {
     
-    if (beacon.device.typeString == self.deviceType) {
+    if (beacon.device.typeString == deviceType) {
         
         NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-        [dictionary setObject:@"code" forKey:@"Beacon_Found"];
-        [dictionary setObject:beacon.name forKey:@"name"];
+        [dictionary setValue:@"code" forKey:@"Beacon_Found"];
+        [dictionary setValue:beacon.name forKey:@"name"];
         if ([beacon isKindOfClass:[BLUBluFi class]]) {
-            [dictionary setObject:beacon.device.typeString forKey:@"type"];
+            [dictionary setValue:beacon.device.typeString forKey:@"type"];
         } else {
-            [dictionary setObject:beacon.identifier.stringValue forKey:@"id"];
-            [dictionary setObject:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
-            [dictionary setObject:beacon.device.macAddress forKey:@"address"];
-            [dictionary setObject:beacon.device.typeString forKey:@"type"];
+            [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
+            [dictionary setValue:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
+            [dictionary setValue:beacon.device.macAddress forKey:@"address"];
+            [dictionary setValue:beacon.device.typeString forKey:@"type"];
         }
         
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK message: dictionary];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     	[self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
     }
 }
 
 - (void)beaconLost:(BLUSBeacon *)beacon {
     
-    if (beacon.device.typeString == self.deviceType)
+    if (beacon.device.typeString == deviceType) {
         
         NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-        [dictionary setObject:@"code" forKey:@"Beacon_Lost"];
-        [dictionary setObject:beacon.name forKey:@"name"];
+        [dictionary setValue:@"code" forKey:@"Beacon_Lost"];
+        [dictionary setValue:beacon.name forKey:@"name"];
         if ([beacon isKindOfClass:[BLUBluFi class]]) {
-            [dictionary setObject:beacon.device.typeString forKey:@"type"];
+            [dictionary setValue:beacon.device.typeString forKey:@"type"];
         } else {
-            [dictionary setObject:beacon.identifier.stringValue forKey:@"id"];
-            [dictionary setObject:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
-            [dictionary setObject:beacon.device.macAddress forKey:@"address"];
-            [dictionary setObject:beacon.device.typeString forKey:@"type"];
+            [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
+            [dictionary setValue:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
+            [dictionary setValue:beacon.device.macAddress forKey:@"address"];
+            [dictionary setValue:beacon.device.typeString forKey:@"type"];
         }
         
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK message: dictionary];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     	[self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
-    } {
+    }
 }
 
 - (void)enableBluetooth {
@@ -146,7 +154,7 @@
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
     [dictionary setValue:@"Fail" forKey:@"Bluetooth"];
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
     scanCommand = nil;
 }
@@ -156,7 +164,7 @@
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
     [dictionary setValue:@"Fail" forKey:@"Location"];
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
     scanCommand = nil;
 }
@@ -169,22 +177,22 @@
     for (BZCTemplate *template in templates) {
         
         NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-        [dict setObject:template.identifier.stringValue forKey:@"templateId"];
-        [dict setObject:template.name forKey:@"name"];
+        [dict setValue:template.identifier.stringValue forKey:@"templateId"];
+        [dict setValue:template.name forKey:@"name"];
     }
     
-    [dictionary setObject:array forKey:@"templates"];
+    [dictionary setValue:array forKey:@"templates"];
 
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:templateCommand.callbackId];
 }
 
 - (void)loadTemplateError:(NSString *)message {
     
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-    [dictionary setObject:message forKey:@"Template_Fail"];
+    [dictionary setValue:message forKey:@"Template_Fail"];
 
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:templateCommand.callbackId];
     templateCommand = nil;
 }
@@ -194,7 +202,7 @@
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
     [dictionary setValue:@"code" forKey:@"Provision_Sucess"];
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:connectioncommand.callbackId];
 }
 
@@ -204,7 +212,7 @@
     [dictionary setValue:@"result" forKey:@"ERROR"];
     [dictionary setValue:@"reason" forKey:message];
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:connectioncommand.callbackId];
     connectioncommand = nil;
 }
@@ -215,7 +223,7 @@
     [dictionary setValue:@"code" forKey:@"Status_Changed"];
     [dictionary setValue:@"result" forKey:status];
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:connectioncommand.callbackId];
 }
 
@@ -225,7 +233,7 @@
     [dictionary setValue:@"code" forKey:@"Desc_Changed"];
     [dictionary setValue:@"result" forKey:description];
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK message: dictionary];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:connectioncommand.callbackId];
 }
 

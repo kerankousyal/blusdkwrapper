@@ -5,15 +5,13 @@
         <clobbers target="cordova.plugins.BluProvisionWrapper" /></js-module>
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
-        <feature name="BluProvisionWrapper"><param name="ios-package" value="BluProvisionWrapper" /></feature>
-            <framework src="src/ios/lib/Bluvision.framework" custom="true" embed="true"/>
-            <framework src="src/ios/lib/BluzoneCloud.framework" custom="true" embed="true"/>
-            <source-file src="src/ios/lib/Bluvision.framework" target-dir="lib" framework="true" />
-            <source-file src="src/ios/lib/BluzoneCloud.framework" target-dir="lib" framework="true" />
-    </config-file>
-    <source-file src="src/ios/com/bluvision/beacons/plugin/BluProvisionWrapper.m" />
-    <source-file src="src/ios/com/bluvision/beacons/plugin/BeaconInteractor.h" />
-    <source-file src="src/ios/com/bluvision/beacons/plugin/BeaconInteractor.m" />
+            <feature name="BluProvisionWrapper"><param name="ios-package" value="BluProvisionWrapper" /></feature>
+        </config-file>
+        <framework src="src/ios/lib/Bluvision.framework" custom="true" embed="true"/>
+        <framework src="src/ios/lib/BluzoneCloud.framework" custom="true" embed="true"/>
+        <source-file src="src/ios/com/bluvision/beacons/plugin/BluProvisionWrapper.m" />
+        <source-file src="src/ios/com/bluvision/beacons/plugin/BeaconInteractor.h" />
+        <source-file src="src/ios/com/bluvision/beacons/plugin/BeaconInteractor.m" />
     </platform>
     <platform name="android">
       <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
