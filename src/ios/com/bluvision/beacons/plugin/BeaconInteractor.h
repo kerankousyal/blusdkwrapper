@@ -2,9 +2,6 @@
 //  BeaconInteractor.h
 //  BluPro
 //
-//  Created by Abhishek on 03/05/19.
-//  Copyright © 2019 Abhishek. All rights reserved.
-//
 
 #import <Foundation/Foundation.h>
 
