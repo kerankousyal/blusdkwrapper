@@ -71,11 +71,13 @@
     NSDictionary* dictionary = [command.arguments objectAtIndex:0];
     NSString* template = [dictionary valueForKey:@"templateId"];
     NSString* notes = [dictionary valueForKey:@"notes"];
+    NSString* name = [dictionary valueForKey:@"name"];
     if (notes == nil) {
     	notes = @"";
     }
     if (template != nil) {
-    	[interactor provisionBeaconForTemplate:[template intValue] notes:notes];
+
+        [interactor provisionBeaconForTemplate:[template intValue] beaconName:name notes:notes];
     }
 }
 

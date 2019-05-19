@@ -44,6 +44,7 @@ BOOL scanning = false;
     [BZCUser authenticateWithAPIToken:token completion:^(BZCUser * _Nullable user, NSError * _Nullable error) {
         if (error == nil && user != nil) {
             [self.delegate signInSuccess:user];
+            [self startScan];
         } else {
             [self.delegate signInFailure:error];
         }
@@ -108,11 +109,12 @@ BOOL scanning = false;
     }
 }
 
-- (void)provisionBeaconForTemplate:(int)templateId notes:(NSString *)notes {
+- (void)provisionBeaconForTemplate:(int)templateId beaconName:(NSString *)name notes:(NSString *)notes {
     
     if (self.provisioner != nil) {
         
         self.provisioner.templateIdentifier = [NSNumber numberWithInt:templateId];
+        self.provisioner.deviceFriendlyName = name;
         self.provisioner.notes = notes;
         [self getLocations];
     }

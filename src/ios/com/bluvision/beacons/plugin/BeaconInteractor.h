@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)startScan;
 - (void)stopScan;
 - (void)loadTemplates:(NSString *)identifier;
-- (void)provisionBeaconForTemplate:(int)templateId notes:(NSString *)notes;
+- (void)provisionBeaconForTemplate:(int)templateId beaconName:(NSString *)name notes:(NSString *)notes;
 
 @end
 
