@@ -91,7 +91,6 @@
     [dictionary setValue:user.email forKey:@"user_email"];
     [dictionary setValue:user.currentProject.identifier forKey:@"project_id"];
     [dictionary setValue:user.currentProject.name forKey:@"project_name"];
-    [dictionary setValue:user.currentProject forKey:@"current_project"];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
