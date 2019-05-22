@@ -4,14 +4,22 @@
 #import <Bluvision/BLUBluFi.h>
 #import "BeaconInteractor.h"
 
-@interface BluProvisionWrapper : CDVPlugin <BeaconInteractorDelegate> {
+@interface BluProvisionWrapper : CDVPlugin <BeaconInteractorDelegate, CBCentralManagerDelegate> {
     BeaconInteractor *interactor;
     NSString *deviceType;
+    CDVInvokedUrlCommand *locationCommand;
+    CDVInvokedUrlCommand *bluCommand;
     CDVInvokedUrlCommand *scanCommand;
     CDVInvokedUrlCommand *connectioncommand;
     CDVInvokedUrlCommand *templateCommand;
 }
 
+@property (nonatomic, strong) CLLocationManager *locationManager;
+@property (nonatomic, strong) CBCentralManager *bluManager;
+@property (nonatomic, strong) NSTimer *timer;
+
+- (void)bluetoothPermission:(CDVInvokedUrlCommand*)command;
+- (void)locationPermission:(CDVInvokedUrlCommand*)command;
 - (void)init:(CDVInvokedUrlCommand*)command;
 - (void)signIn:(CDVInvokedUrlCommand*)command;
 - (void)startScan:(CDVInvokedUrlCommand*)command;
@@ -23,9 +31,102 @@
 
 @implementation BluProvisionWrapper
 
-- (void)init:(CDVInvokedUrlCommand*)command {
+- (void)bluetoothPermission:(CDVInvokedUrlCommand*)command {
+    
+    bluCommand = command;
+    [self blutoothPermission];
+}
 
-	scanCommand = command;
+- (void)locationPermission:(CDVInvokedUrlCommand*)command {
+    
+    locationCommand = command;
+    [self requestAlwaysAuth];
+}
+
+- (void)requestAlwaysAuth {
+    
+    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+    
+    if (status == kCLAuthorizationStatusNotDetermined) {
+        
+        self.locationManager = [[CLLocationManager alloc] init];
+        [self.locationManager requestWhenInUseAuthorization];
+        self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                                      target:self
+                                                    selector:@selector(checkStatus)
+                                                    userInfo:nil repeats:YES];
+    } else if (status == kCLAuthorizationStatusAuthorizedWhenInUse || status == kCLAuthorizationStatusAuthorizedAlways) {
+        
+        // send success
+        NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+        [dictionary setValue:@"Location_Success" forKey:@"code"];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
+        [pluginResult setKeepCallbackAsBool:NO];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:locationCommand.callbackId];
+    } else if (status == kCLAuthorizationStatusDenied) {
+        
+        [self requestLocationPermissions];
+    }
+}
+
+- (void)blutoothPermission {
+    
+    self.bluManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+}
+
+- (void)centralManagerDidUpdateState:(CBCentralManager *)central {
+    
+    if (self.bluManager.state == CBManagerStatePoweredOn) {
+        
+        NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+        [dictionary setValue:@"Blutooth_Success" forKey:@"code"];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
+        [pluginResult setKeepCallbackAsBool:NO];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:bluCommand.callbackId];
+    } else {
+        
+        NSString *stateString = @"";
+        if (self.bluManager.state == CBCentralManagerStateResetting) {
+            stateString = @"The connection with the system service was momentarily lost, update imminent.";
+        } else if (self.bluManager.state == CBCentralManagerStateUnsupported) {
+            stateString = @"The platform doesn't support Bluetooth Low Energy.";
+        } else if (self.bluManager.state == CBCentralManagerStateUnauthorized) {
+            stateString = @"The app is not authorized to use Bluetooth Low Energy.";
+        } else if (self.bluManager.state == CBCentralManagerStatePoweredOff) {
+            stateString = @"Bluetooth is currently powered off.";
+        } else if (self.bluManager.state == CBManagerStateUnknown) {
+            stateString = @"State unknown, update imminent.";
+        }
+        [self enableBluetooth:stateString];
+    }
+}
+
+- (void)checkStatus {
+    
+    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+    
+    if (status == kCLAuthorizationStatusAuthorizedWhenInUse || status == kCLAuthorizationStatusAuthorizedAlways) {
+        
+        [self.timer invalidate];
+        
+        NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+        [dictionary setValue:@"Location_Success" forKey:@"code"];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
+        [pluginResult setKeepCallbackAsBool:NO];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:locationCommand.callbackId];
+    } else {
+        if (status==kCLAuthorizationStatusDenied) {
+            // denied
+            [self.timer invalidate];
+            
+            [self requestLocationPermissions];
+        }
+    }
+}
+
+- (void)init:(CDVInvokedUrlCommand*)command {
+    
+    scanCommand = command;
     NSString* device = [command.arguments objectAtIndex:0];
     if (device != nil && device.length > 0) {
         deviceType = device;
@@ -36,47 +137,47 @@
 }
 
 - (void)signIn:(CDVInvokedUrlCommand*)command {
-
-	scanCommand = command;
+    
+    scanCommand = command;
     NSString* token = [command.arguments objectAtIndex:0];
     if (token != nil) {
-    	[interactor signIn:token];
+        [interactor signIn:token];
     }
 }
 
 - (void)startScan:(CDVInvokedUrlCommand*)command {
-
-	scanCommand = command;
+    
+    scanCommand = command;
     [interactor startScan];
 }
 
 - (void)stopScan:(CDVInvokedUrlCommand*)command {
-
-	scanCommand = nil;
+    
+    scanCommand = nil;
     [interactor stopScan];
 }
 
 - (void)getTemplates:(CDVInvokedUrlCommand*)command {
-
-	templateCommand = command;
+    
+    templateCommand = command;
     NSString* beacondentifier = [command.arguments objectAtIndex:0];
     if (beacondentifier != nil) {
-    	[interactor loadTemplates:beacondentifier];
+        [interactor loadTemplates:beacondentifier];
     }
 }
 
 - (void)provision:(CDVInvokedUrlCommand*)command {
-
-	connectioncommand = command;
+    
+    connectioncommand = command;
     NSDictionary* dictionary = [command.arguments objectAtIndex:0];
     NSString* template = [dictionary valueForKey:@"templateId"];
     NSString* notes = [dictionary valueForKey:@"notes"];
     NSString* name = [dictionary valueForKey:@"name"];
     if (notes == nil) {
-    	notes = @"";
+        notes = @"";
     }
     if (template != nil) {
-
+        
         [interactor provisionBeaconForTemplate:[template intValue] beaconName:name notes:notes];
     }
 }
@@ -91,7 +192,7 @@
     [dictionary setValue:user.email forKey:@"user_email"];
     [dictionary setValue:user.currentProject.identifier forKey:@"project_id"];
     [dictionary setValue:user.currentProject.name forKey:@"project_name"];
-
+    
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     [pluginResult setKeepCallbackAsBool:YES];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
@@ -154,26 +255,26 @@
     }
 }
 
-- (void)enableBluetooth {
+- (void)enableBluetooth:(NSString *)message {
     
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-    [dictionary setValue:@"Bluetooth" forKey:@"Fail"];
+    [dictionary setValue:message forKey:@"result"];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
     [pluginResult setKeepCallbackAsBool:NO];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
-    scanCommand = nil;
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:bluCommand.callbackId];
+    bluCommand = nil;
 }
 
 - (void)requestLocationPermissions {
     
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-    [dictionary setValue:@"Location" forKey:@"Fail"];
+    [dictionary setValue:@"Location permission required" forKey:@"result"];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
     [pluginResult setKeepCallbackAsBool:NO];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
-    scanCommand = nil;
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:locationCommand.callbackId];
+    locationCommand = nil;
 }
 
 - (void)loadTemplateSucess:(NSArray *)templates {
@@ -189,7 +290,7 @@
     }
     
     [dictionary setValue:array forKey:@"templates"];
-
+    
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
     [pluginResult setKeepCallbackAsBool:NO];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:templateCommand.callbackId];
@@ -199,7 +300,7 @@
     
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
     [dictionary setValue:message forKey:@"Template_Fail"];
-
+    
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
     [pluginResult setKeepCallbackAsBool:NO];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:templateCommand.callbackId];
@@ -253,10 +354,10 @@
 #pragma mark - Private Method
 
 - (NSString *)convertToHex: (NSString *)string {
-
+    
     NSString *hexString = [NSString stringWithFormat:@"%@",
-                         [NSData dataWithBytes:[string cStringUsingEncoding:NSUTF8StringEncoding]
-                                        length:strlen([string cStringUsingEncoding:NSUTF8StringEncoding])]];
+                           [NSData dataWithBytes:[string cStringUsingEncoding:NSUTF8StringEncoding]
+                                          length:strlen([string cStringUsingEncoding:NSUTF8StringEncoding])]];
     
     for(NSString * toRemove in [NSArray arrayWithObjects:@"<", @">", @" ", nil])
         hexString = [string stringByReplacingOccurrencesOfString:toRemove withString:@""];

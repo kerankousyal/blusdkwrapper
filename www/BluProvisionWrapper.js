@@ -27,3 +27,11 @@ exports.signIn = function (arg0, successCallback, errorCallback) {
 exports.signOut = function (arg0, successCallback, errorCallback) {
     exec(successCallback, errorCallback, 'BluProvisionWrapper', 'signOut', [arg0]);
 };
+
+exports.bluetoothPermission = function (arg0, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'bluetoothPermission', [arg0]);
+};
+
+exports.locationPermission = function (arg0, successCallback, errorCallback) {
+    exec(successCallback, errorCallback, 'BluProvisionWrapper', 'locationPermission', [arg0]);
+};
