@@ -87,11 +87,12 @@ BOOL scanning = false;
             else {
                 [self.delegate loadTemplateError:error.localizedDescription];
             }
+        } else {
+            for (BZCTemplate *template in templates) {
+                [self.templateList setObject:template forKey:template.identifier.stringValue];
+            }
+            [self.delegate loadTemplateSucess:templates];
         }
-        for (BZCTemplate *template in templates) {
-            [self.templateList setObject:template forKey:template.identifier.stringValue];
-        }
-        [self.delegate loadTemplateSucess:templates];
     };
     
     BLUSBeacon *configurableBeacon = [self.beaconList objectForKey:beacondentifier];

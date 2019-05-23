@@ -157,7 +157,7 @@
     [interactor stopScan];
 }
 
-- (void)getTemplates:(CDVInvokedUrlCommand*)command {
+- (void)getTemplate:(CDVInvokedUrlCommand*)command {
     
     templateCommand = command;
     NSString* beacondentifier = [command.arguments objectAtIndex:0];
@@ -213,46 +213,40 @@
 
 - (void)beaconFound:(BLUSBeacon *)beacon {
     
-    if (beacon.device.typeString == deviceType) {
-        
-        NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-        [dictionary setValue:@"Beacon_Found" forKey:@"code"];
-        [dictionary setValue:beacon.name forKey:@"name"];
-        if ([beacon isKindOfClass:[BLUBluFi class]]) {
-            [dictionary setValue:deviceType forKey:@"type"];
-        } else {
-            [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
-            [dictionary setValue:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
-            [dictionary setValue:beacon.device.macAddress forKey:@"address"];
-            [dictionary setValue:deviceType forKey:@"type"];
-        }
-        
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
+    NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+    [dictionary setValue:@"Beacon_Found" forKey:@"code"];
+    [dictionary setValue:beacon.name forKey:@"name"];
+    if ([beacon isKindOfClass:[BLUBluFi class]]) {
+        [dictionary setValue:deviceType forKey:@"type"];
+    } else {
+        [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
+        [dictionary setValue:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
+        [dictionary setValue:beacon.device.macAddress forKey:@"address"];
+        [dictionary setValue:deviceType forKey:@"type"];
     }
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
+    [pluginResult setKeepCallbackAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
 }
 
 - (void)beaconLost:(BLUSBeacon *)beacon {
     
-    if (beacon.device.typeString == deviceType) {
-        
-        NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-        [dictionary setValue:@"Beacon_Lost" forKey:@"code"];
-        [dictionary setValue:beacon.name forKey:@"name"];
-        if ([beacon isKindOfClass:[BLUBluFi class]]) {
-            [dictionary setValue:beacon.device.typeString forKey:@"type"];
-        } else {
-            [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
-            [dictionary setValue:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
-            [dictionary setValue:beacon.device.macAddress forKey:@"address"];
-            [dictionary setValue:beacon.device.typeString forKey:@"type"];
-        }
-        
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
+    NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+    [dictionary setValue:@"Beacon_Lost" forKey:@"code"];
+    [dictionary setValue:beacon.name forKey:@"name"];
+    if ([beacon isKindOfClass:[BLUBluFi class]]) {
+        [dictionary setValue:beacon.device.typeString forKey:@"type"];
+    } else {
+        [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
+        [dictionary setValue:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
+        [dictionary setValue:beacon.device.macAddress forKey:@"address"];
+        [dictionary setValue:beacon.device.typeString forKey:@"type"];
     }
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: dictionary];
+    [pluginResult setKeepCallbackAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:scanCommand.callbackId];
 }
 
 - (void)enableBluetooth:(NSString *)message {
