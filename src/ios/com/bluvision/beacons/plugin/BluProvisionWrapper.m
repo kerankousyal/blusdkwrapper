@@ -24,7 +24,7 @@
 - (void)signIn:(CDVInvokedUrlCommand*)command;
 - (void)startScan:(CDVInvokedUrlCommand*)command;
 - (void)stopScan:(CDVInvokedUrlCommand*)command;
-- (void)getTemplates:(CDVInvokedUrlCommand*)command;
+- (void)getTemplate:(CDVInvokedUrlCommand*)command;
 - (void)provision:(CDVInvokedUrlCommand*)command;
 
 @end

@@ -16,7 +16,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)signInFailure:(NSError *)error;
 - (void)beaconFound:(BLUSBeacon *)beacon;
 - (void)beaconLost:(BLUSBeacon *)beacon;
-- (void)enableBluetooth;
 - (void)requestLocationPermissions;
 - (void)loadTemplateSucess:(NSArray *)templates;
 - (void)loadTemplateError:(NSString *)message;
