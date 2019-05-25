@@ -281,6 +281,7 @@
         NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
         [dict setValue:template.identifier.stringValue forKey:@"templateId"];
         [dict setValue:template.name forKey:@"name"];
+        [array addObject:dict];
     }
     
     [dictionary setValue:array forKey:@"templates"];

@@ -39,6 +39,7 @@ BOOL scanning = false;
 
 - (void)signIn:(NSString *)token {
     
+    scanning = false;
     [[BZCClient client] enableNetworkLogging];
     
     [BZCUser authenticateWithAPIToken:token completion:^(BZCUser * _Nullable user, NSError * _Nullable error) {
