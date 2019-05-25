@@ -141,14 +141,14 @@
     scanCommand = command;
     NSString* token = [command.arguments objectAtIndex:0];
     if (token != nil) {
-        [interactor signIn:token];
+        [interactor signIn:token device:deviceType];
     }
 }
 
 - (void)startScan:(CDVInvokedUrlCommand*)command {
     
     scanCommand = command;
-    [interactor startScan];
+    [interactor startScan:deviceType];
 }
 
 - (void)stopScan:(CDVInvokedUrlCommand*)command {
@@ -218,6 +218,7 @@
     [dictionary setValue:beacon.name forKey:@"name"];
     if ([beacon isKindOfClass:[BLUBluFi class]]) {
         [dictionary setValue:deviceType forKey:@"type"];
+        [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
     } else {
         [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
         [dictionary setValue:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];

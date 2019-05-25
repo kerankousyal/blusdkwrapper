@@ -29,8 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface BeaconInteractor : NSObject
 
 - (id)initWithDelegate:(id <BeaconInteractorDelegate>)delegate;
-- (void)signIn:(NSString *)token;
-- (void)startScan;
+- (void)signIn:(NSString *)token device:(NSString *)deviceType;
+- (void)startScan:(NSString *)deviceType;
 - (void)stopScan;
 - (void)loadTemplates:(NSString *)identifier;
 - (void)provisionBeaconForTemplate:(int)templateId beaconName:(NSString *)name notes:(NSString *)notes;

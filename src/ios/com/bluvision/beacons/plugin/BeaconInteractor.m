@@ -5,6 +5,8 @@
 
 #import "BeaconInteractor.h"
 
+#import <Bluvision/BLUBeaconManager+Private.h>
+
 @interface BZCClient ()
 
 - (void)enableNetworkLogging;
@@ -37,7 +39,7 @@ BOOL scanning = false;
     return self;
 }
 
-- (void)signIn:(NSString *)token {
+- (void)signIn:(NSString *)token device:(NSString *)deviceType {
     
     scanning = false;
     [[BZCClient client] enableNetworkLogging];
@@ -45,18 +47,22 @@ BOOL scanning = false;
     [BZCUser authenticateWithAPIToken:token completion:^(BZCUser * _Nullable user, NSError * _Nullable error) {
         if (error == nil && user != nil) {
             [self.delegate signInSuccess:user];
-            [self startScan];
+            [self startScan:deviceType];
         } else {
             [self.delegate signInFailure:error];
         }
     }];
 }
 
-- (void)startScan {
+- (void)startScan:(NSString *)deviceType {
     
     if (self.beaconManager != nil && scanning == false) {
-        [self.beaconManager startScanningForBeacons];
         scanning = true;
+        if ([deviceType isEqualToString:@"SBeacon"]) {
+            [self.beaconManager startScanningForBeacons];
+        } else {
+            [self.beaconManager startScanningForBluFis];
+        }
     }
 }
 
@@ -148,6 +154,7 @@ BOOL scanning = false;
         if (error) {
             
             NSLog(@"%@", error.localizedDescription);
+            [self.delegate provisionError:error.localizedDescription];
             return;
         }
         self.provisionedDevice = device;
