@@ -286,8 +286,8 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
 //                jsonObject.put("configType", template.getConfigType());
 //                jsonObject.put("iBeacon", template.hasIBeacon());
 //                jsonObject.put("sBeacon", template.hasSBeacon());
-//                jsonObject.put("dateCreated", template.getDateCreated().toString());
-//                jsonObject.put("dateUpdated", template.getDateUpdated().toString());
+                jsonObject.put("dateCreated", template.getDateCreated().toString());
+                jsonObject.put("dateUpdated", template.getDateUpdated().toString());
 //                jsonObject.put("projectId", template.getProjectId());
 //                jsonObject.put("BLUFI_TEMPLATE_SECURITY_OPEN", 0);
 //                jsonObject.put("BLUFI_TEMPLATE_SECURITY_WEP", 1);
