@@ -148,6 +148,7 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
                 result.put("hex", hexIdentifier);
                 result.put("address",  beacon.getBluetoothDevice().getAddress());
                 result.put("type",  beacon.getTypeString());
+                result.put("rssi",  beacon.getRSSI());
               }
               if (beacon instanceof Blufi){
                 result.put("type",  beacon.getTypeString());
