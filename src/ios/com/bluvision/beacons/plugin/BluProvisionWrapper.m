@@ -216,6 +216,8 @@
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
     [dictionary setValue:@"Beacon_Found" forKey:@"code"];
     [dictionary setValue:beacon.name forKey:@"name"];
+    [dictionary setValue:beacon.RSSI forKey:@"rssi"];
+    
     if ([beacon isKindOfClass:[BLUBluFi class]]) {
         [dictionary setValue:deviceType forKey:@"type"];
         [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
@@ -236,7 +238,6 @@
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
     [dictionary setValue:@"Beacon_Lost" forKey:@"code"];
     [dictionary setValue:beacon.name forKey:@"name"];
-    [dictionary setValue:beacon.RSSI forKey:@"rssi"];
     if ([beacon isKindOfClass:[BLUBluFi class]]) {
         [dictionary setValue:beacon.device.typeString forKey:@"type"];
     } else {
