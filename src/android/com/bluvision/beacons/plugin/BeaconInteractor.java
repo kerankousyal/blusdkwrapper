@@ -143,7 +143,7 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
                 }
             } else {
                 if (error.getCode() > 50000) {
-                    mBeaconCallback.loadTemplateError("This device cannot be provisioned\n\nPlease contact Bluvision support for assistance");
+                    mBeaconCallback.loadTemplateError("This device cannot be provisioned\n\nPlease contact support for assistance");
 
                     if (error.getCode() == 50404) {
                         mBeaconCallback.loadTemplateError("Device already Provisioned\n\nThis Device is already provisioned for use with " +
@@ -185,7 +185,6 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
             @Override
             public void onSuccess(Device device) {
                 mBeaconCallback.provisionSuccess();
-                Log.i("provision", "device provisioned");
             }
 
             @Override

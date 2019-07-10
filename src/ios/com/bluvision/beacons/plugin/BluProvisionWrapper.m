@@ -217,7 +217,6 @@
     [dictionary setValue:@"Beacon_Found" forKey:@"code"];
     [dictionary setValue:beacon.name forKey:@"name"];
     [dictionary setValue:beacon.RSSI forKey:@"rssi"];
-    
     if ([beacon isKindOfClass:[BLUBluFi class]]) {
         [dictionary setValue:deviceType forKey:@"type"];
         [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];

@@ -29,7 +29,7 @@
 BOOL scanning = false;
 
 - (id)initWithDelegate:(id <BeaconInteractorDelegate>)delegate {
-    
+
     if (self = [super init])
     {
         self.delegate = delegate;
@@ -40,10 +40,10 @@ BOOL scanning = false;
 }
 
 - (void)signIn:(NSString *)token device:(NSString *)deviceType {
-    
+
     scanning = false;
     [[BZCClient client] enableNetworkLogging];
-    
+
     [BZCUser authenticateWithAPIToken:token completion:^(BZCUser * _Nullable user, NSError * _Nullable error) {
         if (error == nil && user != nil) {
             [self.delegate signInSuccess:user];
@@ -55,7 +55,7 @@ BOOL scanning = false;
 }
 
 - (void)startScan:(NSString *)deviceType {
-    
+
     if (self.beaconManager != nil && scanning == false) {
         scanning = true;
         if ([deviceType isEqualToString:@"SBeacon"]) {
@@ -67,7 +67,7 @@ BOOL scanning = false;
 }
 
 - (void)stopScan {
-    
+
     if (self.beaconManager != nil && scanning == true) {
         [self.beaconManager stopScanning];
         scanning = false;
@@ -75,7 +75,7 @@ BOOL scanning = false;
 }
 
 - (void)loadTemplates:(NSString *)beacondentifier {
-    
+
     if (self.provisioner != nil) {
         self.provisioner = nil;
     }
@@ -84,10 +84,10 @@ BOOL scanning = false;
         if (error) {
             if (error.code >= 50000) {
                 if (error.code == 50404) {
-                    NSString *error = @"This beacon is already provisioned for use with another project";
+                    NSString *error = @"This transmitter is already provisioned for use with another project";
                     [self.delegate loadTemplateError:error];
                 } else {
-                    NSString *error = @"This device cannot be provisioned, Please contact Bluvision support for assistance";
+                    NSString *error = @"This device cannot be provisioned, Please contact support for assistance";
                     [self.delegate loadTemplateError:error];
                 }
             }
@@ -101,7 +101,7 @@ BOOL scanning = false;
             [self.delegate loadTemplateSucess:templates];
         }
     };
-    
+
     BLUSBeacon *configurableBeacon = [self.beaconList objectForKey:beacondentifier];
     self.provisioner = [[BZCProvisioner alloc] initWithConfigurableBeacon:configurableBeacon];
 
@@ -118,9 +118,9 @@ BOOL scanning = false;
 }
 
 - (void)provisionBeaconForTemplate:(int)templateId beaconName:(NSString *)name notes:(NSString *)notes {
-    
+
     if (self.provisioner != nil) {
-        
+
         self.provisioner.templateIdentifier = [NSNumber numberWithInt:templateId];
         self.provisioner.deviceFriendlyName = name;
         self.provisioner.notes = notes;
@@ -129,13 +129,13 @@ BOOL scanning = false;
 }
 
 - (void)getLocations {
-    
+
     [[[BZCUser currentUser] currentProject] locationsWithCompletion:^(NSArray<BZCLocation *> * _Nullable locations, NSError * _Nullable error) {
         if (locations.count == 0) {
             NSLog(@"Locations are needed for this example, locations can be auto generated if there are none but require a geo location that is not (0,0). "
-                  "Please create a location on bluzone.io or supply a geo location to the provisioner object in prepareForSegue:");
+                  "Please create a location on your cloud or supply a geo location to the provisioner object in prepareForSegue:");
         }
-        
+
         if (locations != nil && locations.count > 0) {
             BZCLocation *location = locations[0];
             self.provisioner.location = location;
@@ -146,13 +146,13 @@ BOOL scanning = false;
 }
 
 - (void)provisionBeacon {
-    
+
     self.provisioner.delegate = self;
-    
+
     [self.provisioner startProvisioningWithCompletion:^(BZCDevice * _Nullable device, NSError * _Nullable error) {
-        
+
         if (error) {
-            
+
             NSLog(@"%@", error.localizedDescription);
             [self.delegate provisionError:error.localizedDescription];
             return;
@@ -161,20 +161,20 @@ BOOL scanning = false;
         [self.delegate provisionSuccess];
     } recoverableConnectionFailureBlock:^BOOL(NSError * _Nullable error) {
         if (error.code == 5022) {
-            
+
             [self.delegate provisionError:error.localizedDescription];
         }
         return NO;
     }];
-    
+
 }
 
 #pragma mark BLUBeaconManagerDelegate
 
 - (void)beaconManager:(BLUBeaconManager *)manager didFindBeacon:(BLUBeacon *)beacon {
-    
+
     if (beacon != nil && [beacon isKindOfClass:[BLUSBeacon class]]) {
-        
+
         BLUSBeacon *device = (BLUSBeacon *)beacon;
         [self.beaconList setObject:device forKey:device.identifier.stringValue];
         [self.delegate beaconFound:device];
@@ -182,9 +182,9 @@ BOOL scanning = false;
 }
 
 - (void)beaconManager:(BLUBeaconManager *)manager didLoseBeacon:(BLUBeacon *)beacon {
-    
+
     if (beacon != nil && [beacon isKindOfClass:[BLUSBeacon class]]) {
-        
+
         BLUSBeacon *device = (BLUSBeacon *)beacon;
         [self.beaconList removeObjectForKey:device.identifier.stringValue];
         [self.delegate beaconLost:device];
@@ -192,24 +192,24 @@ BOOL scanning = false;
 }
 
 - (void)beaconManager:(BLUBeaconManager *)manager didFailWithError:(nullable NSError *)error {
-    
+
     NSLog(@"Error = %@", error.localizedDescription);
 }
 
 #pragma mark - provisioner delegate
 
 - (void)provisioner:(BZCProvisioner *)provisioner didChangeStatus:(NSString *)status {
-    
+
     [self.delegate provisionStatusChange:status];
 }
 
 - (void)provisioner:(BZCProvisioner *)provisioner didChangeDescription:(NSString *)description {
-    
+
     [self.delegate provisionDescriptionChange:description];
 }
 
 - (void)provisioner:(nonnull BZCProvisioner *)provisioner willRetryProvisioningWithError:(nonnull NSError *)error {
-    
+
     NSLog(@"%@", error.localizedDescription);
 }
 

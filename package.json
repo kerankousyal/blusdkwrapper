@@ -1,7 +1,7 @@
 {
   "name": "bluprowrapper",
   "version": "0.1.0",
-  "description": "bluzone provision native wrapper",
+  "description": "Transmitter and Gateway provisioning native wrapper",
   "cordova": {
     "id": "cordova-plugin-bluprovision",
     "platforms": [
