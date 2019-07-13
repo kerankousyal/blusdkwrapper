@@ -87,7 +87,7 @@ BOOL scanning = false;
                     NSString *error = @"This transmitter is already provisioned for use with another project";
                     [self.delegate loadTemplateError:error];
                 } else {
-                    NSString *error = @"This device cannot be provisioned, Please contact support for assistance";
+                    NSString *error = @"This device cannot be provisioned. Please contact support for assistance";
                     [self.delegate loadTemplateError:error];
                 }
             }

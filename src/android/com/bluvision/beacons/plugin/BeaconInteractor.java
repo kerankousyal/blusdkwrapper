@@ -143,10 +143,10 @@ public class BeaconInteractor implements BeaconManager.BeaconListener {
                 }
             } else {
                 if (error.getCode() > 50000) {
-                    mBeaconCallback.loadTemplateError("This device cannot be provisioned\n\nPlease contact support for assistance");
+                    mBeaconCallback.loadTemplateError("This device cannot be provisioned. Please contact support for assistance");
 
                     if (error.getCode() == 50404) {
-                        mBeaconCallback.loadTemplateError("Device already Provisioned\n\nThis Device is already provisioned for use with " +
+                        mBeaconCallback.loadTemplateError("Device already Provisioned. This Device is already provisioned for use with " +
                                                           "another project");
                     }
                 } else {
