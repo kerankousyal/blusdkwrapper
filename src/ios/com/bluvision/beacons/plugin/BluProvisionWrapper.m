@@ -145,6 +145,11 @@
     }
 }
 
+- (void)signOut:(CDVInvokedUrlCommand*)command {
+
+    [interactor signOut];
+}
+
 - (void)startScan:(CDVInvokedUrlCommand*)command {
 
     scanCommand = command;
@@ -154,8 +159,10 @@
 - (void)stopScan:(CDVInvokedUrlCommand*)command {
 
     scanCommand = nil;
+    [interactor signOut];
     [interactor stopScan];
 }
+
 
 - (void)getTemplate:(CDVInvokedUrlCommand*)command {
 

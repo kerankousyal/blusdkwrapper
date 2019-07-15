@@ -54,6 +54,12 @@ BOOL scanning = false;
     }];
 }
 
+- (void)signOut {
+
+    scanning = false;
+    [[BZCUser currentUser] signOut];
+}
+
 - (void)startScan:(NSString *)deviceType {
 
     if (self.beaconManager != nil && scanning == false) {
