@@ -148,6 +148,7 @@
 - (void)signOut:(CDVInvokedUrlCommand*)command {
 
     [interactor signOut];
+    [interactor stopScan];
 }
 
 - (void)startScan:(CDVInvokedUrlCommand*)command {
@@ -159,7 +160,6 @@
 - (void)stopScan:(CDVInvokedUrlCommand*)command {
 
     scanCommand = nil;
-    [interactor signOut];
     [interactor stopScan];
 }
 
