@@ -90,7 +90,7 @@ BOOL scanning = false;
         if (error) {
             if (error.code >= 50000) {
                 if (error.code == 50404) {
-                    NSString *error = @"This transmitter is already provisioned for use with another project";
+                    NSString *error = @"Device already provisioned. This device is already provisioned for use with another project.";
                     [self.delegate loadTemplateError:error];
                 } else {
                     NSString *error = @"This device cannot be provisioned. Please contact support for assistance";
