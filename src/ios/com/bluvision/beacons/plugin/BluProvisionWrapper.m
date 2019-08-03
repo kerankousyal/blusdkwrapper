@@ -65,7 +65,11 @@
         [self.commandDelegate sendPluginResult:pluginResult callbackId:locationCommand.callbackId];
     } else if (status == kCLAuthorizationStatusDenied) {
 
-        [self requestLocationPermissions];
+        NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+        [dictionary setValue:@"Location_Denied" forKey:@"code"];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
+        [pluginResult setKeepCallbackAsBool:NO];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:locationCommand.callbackId];
     }
 }
 
