@@ -66,10 +66,11 @@
     } else if (status == kCLAuthorizationStatusDenied) {
 
         NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
-        [dictionary setValue:@"Location_Denied" forKey:@"code"];
+        [dictionary setValue:@"Please enable location permission in settings" forKey:@"code"];
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
         [pluginResult setKeepCallbackAsBool:NO];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:locationCommand.callbackId];
+        locationCommand = nil;
     }
 }
 
@@ -123,7 +124,12 @@
             // denied
             [self.timer invalidate];
 
-            [self requestLocationPermissions];
+            NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
+            [dictionary setValue:@"Please enable location permission in settings" forKey:@"code"];
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary: dictionary];
+            [pluginResult setKeepCallbackAsBool:NO];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:locationCommand.callbackId];
+            locationCommand = nil;
         }
     }
 }
