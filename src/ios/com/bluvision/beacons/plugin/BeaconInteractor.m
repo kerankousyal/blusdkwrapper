@@ -93,8 +93,9 @@ BOOL scanning = false;
                     NSString *error = @"Device already provisioned. This device is already provisioned for use with another project.";
                     [self.delegate loadTemplateError:error];
                 } else {
-                    NSString *error = @"This device cannot be provisioned. Please contact support for assistance.";
-                    [self.delegate loadTemplateError:error];
+                  NSString *code = [NSString stringWithFormat:@"%ld", error.code];
+                  NSString *error = [NSString stringWithFormat: @"This device cannot be provisioned. Please contact support for assistance. Error code: %@", code];
+                  [self.delegate loadTemplateError:error];
                 }
             }
             else {
