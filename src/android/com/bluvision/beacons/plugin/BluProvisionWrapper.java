@@ -116,15 +116,16 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
             if(deviceType.equals(beacon.getTypeString())){
               result.put("code",  "Beacon_Found");
               result.put("name",  beacon.getBluetoothDevice().getName());
+              result.put("address",  beacon.getBluetoothDevice().getAddress());
+              result.put("rssi",  beacon.getRSSI());
+
               if (beacon instanceof SBeacon) {
                 BigInteger sid64 = ((SBeacon) beacon).getIdentifier();
                 String identifier = sid64.toString();
                 String hexIdentifier = sid64.toString(16).toUpperCase();
                 result.put("id", identifier);
                 result.put("hex", hexIdentifier);
-                result.put("address",  beacon.getBluetoothDevice().getAddress());
                 result.put("type",  beacon.getTypeString());
-                result.put("rssi",  beacon.getRSSI());
               }
               if (beacon instanceof Blufi){
                 result.put("type",  beacon.getTypeString());
@@ -147,13 +148,15 @@ public class BluProvisionWrapper extends CordovaPlugin implements BeaconInteract
           if(deviceType.equals(beacon.getTypeString())){
             result.put("code",  "Beacon_Lost");
             result.put("name",  beacon.getBluetoothDevice().getName());
+            result.put("address",  beacon.getBluetoothDevice().getAddress());
+            result.put("rssi",  beacon.getRSSI());
+
             if (beacon instanceof SBeacon) {
                 BigInteger sid64 = ((SBeacon) beacon).getIdentifier();
                 String identifier = sid64.toString();
                 String hexIdentifier = sid64.toString(16).toUpperCase();
                 result.put("id", identifier);
                 result.put("hex", hexIdentifier);
-                result.put("address",  beacon.getBluetoothDevice().getAddress());
                 result.put("type",  beacon.getTypeString());
             }
             if (beacon instanceof Blufi){
