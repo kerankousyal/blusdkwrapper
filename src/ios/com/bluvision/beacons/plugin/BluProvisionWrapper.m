@@ -234,12 +234,12 @@
     [dictionary setValue:@"Beacon_Found" forKey:@"code"];
     [dictionary setValue:beacon.name forKey:@"name"];
     [dictionary setValue:beacon.RSSI forKey:@"rssi"];
+    [dictionary setValue:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
     if ([beacon isKindOfClass:[BLUBluFi class]]) {
         [dictionary setValue:deviceType forKey:@"type"];
         [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
     } else {
         [dictionary setValue:beacon.identifier.stringValue forKey:@"id"];
-        [dictionary setValue:[self convertToHex:beacon.identifier.stringValue].uppercaseString forKey:@"hex"];
         [dictionary setValue:beacon.device.macAddress forKey:@"address"];
         [dictionary setValue:deviceType forKey:@"type"];
     }
