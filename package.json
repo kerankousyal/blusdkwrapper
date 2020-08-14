@@ -17,7 +17,7 @@
   "author": "kiran",
   "license": "ISC",
   "dependencies": {
-    "@ionic-native/core": "^5.4.0",
+    "@ionic-native/core": "~4.17.0",
     "gulp": "^4.0.0"
   }
 }
