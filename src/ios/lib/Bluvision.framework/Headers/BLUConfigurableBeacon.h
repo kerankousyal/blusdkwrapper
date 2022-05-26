@@ -12,7 +12,6 @@
 @class BLUDevice;
 @class BLUBattery;
 
-
 NS_ASSUME_NONNULL_BEGIN
 
 /**

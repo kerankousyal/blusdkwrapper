@@ -34,8 +34,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readonly, getter=isConnectable) BOOL connectable;
 
-@property (nonatomic, copy) NSArray <NSNumber *> *channels;
-
 @end
 
 NS_ASSUME_NONNULL_END

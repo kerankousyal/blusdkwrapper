@@ -178,8 +178,6 @@ typedef NS_ENUM(uint8_t, BLULightSensorSensivity) {
  */
 @property (nonatomic, readonly) NSNumber *firmwareRevision;
 
-@property (nonatomic, readonly) NSString *macAddress;
-
 #pragma mark - Helper methods
 /** @name Helper methods */
 
